@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Decathlon Procurement — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #0082C3;
+    --blue-dark: #005F8E;
+    --blue-light: #E6F4FB;
+    --blue-mid: #3AABDF;
+    --yellow: #FFEA00;
+    --yellow-light: #FFFBE0;
+    --green: #00B67A;
+    --green-light: #E0F7EE;
+    --red: #E8392A;
+    --red-light: #FDECEA;
+    --orange: #F97316;
+    --orange-light: #FEF0E6;
+    --ink: #0A1628;
+    --ink-mid: #2D3F56;
+    --ink-soft: #5E738A;
+    --line: #D8E4EE;
+    --surface: #F4F8FC;
+    --white: #FFFFFF;
+    --radius: 10px;
+    --shadow: 0 2px 16px rgba(0,130,195,0.08);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Mono', monospace;
+    background: var(--surface);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── NAVBAR ── */
+  nav {
+    background: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0 32px;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+  }
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-right: 36px;
+    text-decoration: none;
+  }
+  .nav-logo {
+    width: 34px;
+    height: 34px;
+    background: var(--yellow);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 15px;
+    color: var(--ink);
+    letter-spacing: -1px;
+  }
+  .nav-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--white);
+    letter-spacing: 0.5px;
+  }
+  .nav-title span { color: var(--blue-mid); }
+  .nav-links { display: flex; gap: 2px; }
+  .nav-link {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.6);
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    transition: all 0.18s;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .nav-link:hover { background: rgba(255,255,255,0.07); color: var(--white); }
+  .nav-link.active {
+    background: var(--blue);
+    color: var(--white);
+  }
+  .nav-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+  .nav-badge {
+    background: var(--red);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 20px;
+    cursor: pointer;
+  }
+  .nav-avatar {
+    width: 32px; height: 32px;
+    background: var(--blue);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  /* ── PAGE HEADER ── */
+  .page-header {
+    background: var(--white);
+    border-bottom: 1px solid var(--line);
+    padding: 20px 36px 16px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .page-header h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    color: var(--ink);
+  }
+  .page-header p { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+  .header-controls { display: flex; gap: 10px; align-items: center; }
+  .cycle-select {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    border: 1.5px solid var(--line);
+    border-radius: 7px;
+    padding: 7px 14px;
+    background: var(--white);
+    color: var(--ink);
+    cursor: pointer;
+    outline: none;
+  }
+  .btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 7px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.16s;
+    letter-spacing: 0.3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-primary { background: var(--blue); color: #fff; }
+  .btn-primary:hover { background: var(--blue-dark); }
+  .btn-outline { background: transparent; border: 1.5px solid var(--line); color: var(--ink-mid); }
+  .btn-outline:hover { border-color: var(--blue); color: var(--blue); }
+
+  /* ── MAIN LAYOUT ── */
+  main { padding: 28px 36px 48px; max-width: 1600px; margin: 0 auto; }
+
+  /* ── KPI CARDS ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .kpi-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    border: 1.5px solid var(--line);
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--blue);
+  }
+  .kpi-card.yellow::before { background: var(--yellow); }
+  .kpi-card.green::before { background: var(--green); }
+  .kpi-card.red::before { background: var(--red); }
+  .kpi-card.orange::before { background: var(--orange); }
+  .kpi-label { font-size: 10px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .kpi-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .kpi-sub { font-size: 10px; color: var(--ink-soft); margin-top: 5px; }
+  .kpi-sub span { font-weight: 500; }
+  .kpi-sub .up { color: var(--green); }
+  .kpi-sub .down { color: var(--red); }
+
+  /* ── ALERT BAR ── */
+  .alert-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+  }
+  .alert-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 30px;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .alert-chip.red { background: var(--red-light); color: var(--red); border: 1.5px solid #f5bbb7; }
+  .alert-chip.orange { background: var(--orange-light); color: var(--orange); border: 1.5px solid #fbd6b5; }
+  .alert-chip.blue { background: var(--blue-light); color: var(--blue); border: 1.5px solid #b3dcf0; }
+  .alert-chip.green { background: var(--green-light); color: var(--green); border: 1.5px solid #9fe5cc; }
+  .alert-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* ── FILTERS ── */
+  .filter-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .search-box {
+    position: relative;
+    flex: 1;
+    min-width: 220px;
+  }
+  .search-box input {
+    width: 100%;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    padding: 8px 12px 8px 34px;
+    border: 1.5px solid var(--line);
+    border-radius: 7px;
+    background: var(--white);
+    color: var(--ink);
+    outline: none;
+    transition: border 0.15s;
+  }
+  .search-box input:focus { border-color: var(--blue); }
+  .search-box svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); opacity: 0.4; }
+  .filter-select {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    border: 1.5px solid var(--line);
+    border-radius: 7px;
+    padding: 8px 12px;
+    background: var(--white);
+    color: var(--ink);
+    cursor: pointer;
+    outline: none;
+  }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1.5px solid var(--line);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .table-header {
+    padding: 16px 20px;
+    border-bottom: 1.5px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .table-header h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .table-meta { font-size: 11px; color: var(--ink-soft); }
+  .tbl-scroll { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11.5px;
+    min-width: 1400px;
+  }
+  thead tr { background: var(--surface); }
+  th {
+    padding: 10px 12px;
+    text-align: left;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--ink-soft);
+    white-space: nowrap;
+    border-bottom: 1.5px solid var(--line);
+    cursor: pointer;
+    user-select: none;
+  }
+  th:hover { color: var(--blue); }
+  th .sort-icon { opacity: 0.4; margin-left: 3px; font-size: 9px; }
+  tbody tr {
+    border-bottom: 1px solid var(--line);
+    transition: background 0.12s;
+    cursor: pointer;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--blue-light); }
+  tbody tr.row-alert-red { background: #fff5f4; }
+  tbody tr.row-alert-red:hover { background: #ffe8e6; }
+  tbody tr.row-alert-orange { background: #fff9f3; }
+  tbody tr.row-alert-orange:hover { background: #fff0e0; }
+  td { padding: 11px 12px; color: var(--ink-mid); white-space: nowrap; vertical-align: middle; }
+  td.mono { font-family: 'DM Mono', monospace; }
+
+  /* Badges */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .badge-blue { background: var(--blue-light); color: var(--blue); }
+  .badge-green { background: var(--green-light); color: var(--green); }
+  .badge-red { background: var(--red-light); color: var(--red); }
+  .badge-orange { background: var(--orange-light); color: var(--orange); }
+  .badge-yellow { background: var(--yellow-light); color: #9a7d00; }
+  .badge-gray { background: #f0f2f5; color: #6b7a8d; }
+
+  /* Date Cells */
+  .date-cell { display: flex; flex-direction: column; gap: 1px; }
+  .date-cell .d { font-size: 11px; color: var(--ink-mid); }
+  .date-cell .d-alert { font-size: 9px; font-weight: 500; }
+  .date-cell .d-alert.overdue { color: var(--red); }
+  .date-cell .d-alert.due-soon { color: var(--orange); }
+  .date-cell .d-alert.ok { color: var(--green); }
+  .date-cell .d-alert.pending { color: var(--ink-soft); }
+
+  /* PNL */
+  .pnl-positive { color: var(--green); font-weight: 500; }
+  .pnl-negative { color: var(--red); font-weight: 500; }
+
+  /* Amount */
+  .amount { font-family: 'DM Mono', monospace; font-size: 11.5px; }
+
+  /* Action buttons */
+  .act-btn {
+    font-size: 10px;
+    padding: 4px 9px;
+    border-radius: 5px;
+    border: 1.5px solid var(--line);
+    background: transparent;
+    cursor: pointer;
+    color: var(--ink-mid);
+    font-family: 'DM Mono', monospace;
+    transition: all 0.14s;
+    margin-right: 4px;
+  }
+  .act-btn:hover { border-color: var(--blue); color: var(--blue); }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,22,40,0.55);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--white);
+    border-radius: 14px;
+    width: 90%;
+    max-width: 720px;
+    max-height: 88vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.22);
+    animation: slideUp 0.22s ease;
+  }
+  @keyframes slideUp { from{transform:translateY(30px);opacity:0} to{transform:translateY(0);opacity:1} }
+  .modal-head {
+    padding: 22px 26px 16px;
+    border-bottom: 1.5px solid var(--line);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+  .modal-head h3 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 17px; color: var(--ink); }
+  .modal-head .ticket-id { font-size: 11px; color: var(--ink-soft); margin-top: 2px; }
+  .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--ink-soft); padding: 0 4px; }
+  .modal-close:hover { color: var(--ink); }
+  .modal-body { padding: 22px 26px; }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 24px; }
+  .detail-item label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--ink-soft); display: block; margin-bottom: 3px; }
+  .detail-item .val { font-size: 13px; font-weight: 500; color: var(--ink); }
+  .detail-divider { border: none; border-top: 1.5px solid var(--line); margin: 18px 0; }
+  .timeline-row { display: flex; flex-direction: column; gap: 10px; }
+  .tl-item { display: flex; gap: 12px; align-items: flex-start; }
+  .tl-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
+  .tl-dot.done { background: var(--green); }
+  .tl-dot.pending { background: var(--line); }
+  .tl-dot.overdue { background: var(--red); }
+  .tl-dot.soon { background: var(--orange); }
+  .tl-label { font-size: 11px; color: var(--ink-mid); }
+  .tl-date { font-size: 10px; color: var(--ink-soft); }
+
+  /* ── FOOTER ── */
+  .footer-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-top: 1.5px solid var(--line);
+    background: var(--surface);
+    font-size: 11px;
+    color: var(--ink-soft);
+  }
+  .pagination { display: flex; gap: 4px; }
+  .pg-btn {
+    padding: 5px 11px;
+    border-radius: 5px;
+    border: 1.5px solid var(--line);
+    background: var(--white);
+    cursor: pointer;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--ink-mid);
+    transition: all 0.14s;
+  }
+  .pg-btn.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .pg-btn:hover:not(.active) { border-color: var(--blue); color: var(--blue); }
+
+  /* Tooltip */
+  [data-tip] { position: relative; }
+  [data-tip]:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: #fff;
+    font-size: 10px;
+    padding: 4px 8px;
+    border-radius: 5px;
+    white-space: nowrap;
+    z-index: 99;
+    pointer-events: none;
+  }
+
+  /* ── PNL CATEGORY ── */
+  .pnl-wrap { display: flex; flex-direction: column; gap: 1px; }
+  .pnl-cat { font-size: 9px; color: var(--ink-soft); letter-spacing: 0.3px; white-space: nowrap; }
+
+  /* ── ANALYTICS MODAL ── */
+  .analytics-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,22,40,0.6);
+    z-index: 300;
+    align-items: center;
+    justify-content: center;
+  }
+  .analytics-overlay.open { display: flex; }
+  .analytics-modal {
+    background: var(--white);
+    border-radius: 16px;
+    width: 95%;
+    max-width: 1000px;
+    max-height: 92vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.28);
+    animation: slideUp 0.22s ease;
+  }
+  .analytics-head {
+    padding: 22px 28px 16px;
+    border-bottom: 1.5px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: var(--white);
+    z-index: 2;
+  }
+  .analytics-head h2 { font-family:'Syne',sans-serif; font-weight:800; font-size:18px; color:var(--ink); }
+  .analytics-head p { font-size:11px; color:var(--ink-soft); margin-top:2px; }
+  .analytics-close { background:none; border:none; font-size:22px; cursor:pointer; color:var(--ink-soft); }
+  .analytics-close:hover { color:var(--ink); }
+  .analytics-tabs { display:flex; gap:6px; padding:16px 28px 0; border-bottom:1.5px solid var(--line); }
+  .a-tab {
+    font-family:'DM Mono',monospace;
+    font-size:11px;
+    font-weight:500;
+    padding:8px 16px;
+    border-radius:7px 7px 0 0;
+    border:none;
+    cursor:pointer;
+    background:transparent;
+    color:var(--ink-soft);
+    border-bottom:2.5px solid transparent;
+    transition:all 0.15s;
+    letter-spacing:0.3px;
+  }
+  .a-tab:hover { color:var(--blue); }
+  .a-tab.active { color:var(--blue); border-bottom-color:var(--blue); background:var(--blue-light); }
+  .analytics-body { padding:24px 28px 28px; }
+  .chart-section { display:none; }
+  .chart-section.active { display:block; }
+  .chart-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .chart-box {
+    background:var(--surface);
+    border-radius:10px;
+    border:1.5px solid var(--line);
+    padding:18px 20px;
+  }
+  .chart-box.full { grid-column:1/-1; }
+  .chart-box h4 { font-family:'Syne',sans-serif; font-weight:700; font-size:13px; color:var(--ink); margin-bottom:4px; }
+  .chart-box p { font-size:10px; color:var(--ink-soft); margin-bottom:14px; }
+  canvas { display:block; }
+  .legend { display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
+  .legend-item { display:flex; align-items:center; gap:5px; font-size:10px; color:var(--ink-mid); }
+  .legend-dot { width:9px; height:9px; border-radius:3px; flex-shrink:0; }
+  .insight-row { display:flex; gap:12px; flex-wrap:wrap; margin-top:18px; }
+  .insight-card {
+    flex:1; min-width:160px;
+    background:var(--white);
+    border:1.5px solid var(--line);
+    border-radius:8px;
+    padding:14px 16px;
+  }
+  .insight-card .i-label { font-size:9px; text-transform:uppercase; letter-spacing:1px; color:var(--ink-soft); margin-bottom:5px; }
+  .insight-card .i-val { font-family:'Syne',sans-serif; font-weight:800; font-size:20px; color:var(--ink); }
+  .insight-card .i-sub { font-size:10px; color:var(--ink-soft); margin-top:3px; }
+
+  @media (max-width: 768px) {
+    main { padding: 18px 14px 36px; }
+    .page-header { padding: 16px 14px; }
+    nav { padding: 0 14px; }
+    .nav-link { padding: 6px 10px; font-size: 10px; }
+    .detail-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── NAVBAR ── -->
+<nav>
+  <a href="index.html" class="nav-brand">
+    <div class="nav-logo">D</div>
+    <span class="nav-title">Decathlon <span>Procurement</span></span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link active">Dashboard</a>
+    <a href="quotation.html" class="nav-link">Quotation</a>
+    <a href="purchase-order.html" class="nav-link">Purchase Order</a>
+    <a href="grn.html" class="nav-link">GRN</a>
+    <a href="invoice.html" class="nav-link">Invoice</a>
+  </div>
+  <div class="nav-right">
+    <span class="nav-badge" id="alertBadge" onclick="scrollToAlerts()">3 Alerts</span>
+    <div class="nav-avatar" title="Procurement Team">PT</div>
+  </div>
+</nav>
+
+<!-- ── PAGE HEADER ── -->
+<div class="page-header">
+  <div>
+    <h1>Procurement Dashboard</h1>
+    <p>Master view · Order-wise tracking · Monthly cycle</p>
+  </div>
+  <div class="header-controls">
+    <select class="cycle-select" id="cycleSelect" onchange="filterByCycle()">
+      <option value="all">All Cycles</option>
+      <option value="2025-04" selected>April 2025</option>
+      <option value="2025-03">March 2025</option>
+      <option value="2025-02">February 2025</option>
+      <option value="2025-01">January 2025</option>
+    </select>
+    <button class="btn btn-outline" onclick="exportCSV()">⬇ Export CSV</button>
+    <button class="btn btn-outline" onclick="openAnalytics()">📊 Analytics</button>
+    <button class="btn btn-primary" onclick="openNewTicket()">+ New Record</button>
+  </div>
+</div>
+
+<!-- ── MAIN ── -->
+<main>
+
+  <!-- KPI Grid -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">Total Orders</div>
+      <div class="kpi-value" id="kpiOrders">—</div>
+      <div class="kpi-sub">This cycle</div>
+    </div>
+    <div class="kpi-card yellow">
+      <div class="kpi-label">Open POs</div>
+      <div class="kpi-value" id="kpiOpenPO">—</div>
+      <div class="kpi-sub">Pending delivery</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">GRN Completed</div>
+      <div class="kpi-value" id="kpiGRN">—</div>
+      <div class="kpi-sub">Assets received</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label">Overdue Invoices</div>
+      <div class="kpi-value" id="kpiOverdue">—</div>
+      <div class="kpi-sub">Past due date</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label">Total Spend (excl GST)</div>
+      <div class="kpi-value" id="kpiSpend">—</div>
+      <div class="kpi-sub">₹ this cycle</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Total Spend (incl GST)</div>
+      <div class="kpi-value" id="kpiSpendGST">—</div>
+      <div class="kpi-sub">₹ this cycle</div>
+    </div>
+  </div>
+
+  <!-- Alert Bar -->
+  <div class="alert-bar" id="alertsSection">
+    <div class="alert-chip red" onclick="filterAlerts('overdue')">
+      <span class="alert-dot"></span>
+      <span id="chipOverdue">0 Invoices Overdue</span>
+    </div>
+    <div class="alert-chip orange" onclick="filterAlerts('due-soon')">
+      <span class="alert-dot"></span>
+      <span id="chipDueSoon">0 Payments Due Soon</span>
+    </div>
+    <div class="alert-chip blue" onclick="filterAlerts('pending-grn')">
+      <span class="alert-dot"></span>
+      <span id="chipPendingGRN">0 GRN Pending</span>
+    </div>
+    <div class="alert-chip green" onclick="filterAlerts('all')">
+      <span>✓ Show All Orders</span>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-row">
+    <div class="search-box">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0A1628" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Search ticket, PO, vendor, product…" id="searchInput" oninput="applyFilters()">
+    </div>
+    <select class="filter-select" id="vendorFilter" onchange="applyFilters()">
+      <option value="">All Vendors</option>
+    </select>
+    <select class="filter-select" id="statusFilter" onchange="applyFilters()">
+      <option value="">All Statuses</option>
+      <option value="Open">Open</option>
+      <option value="PO Issued">PO Issued</option>
+      <option value="Delivered">Delivered</option>
+      <option value="Invoiced">Invoiced</option>
+      <option value="Closed">Closed</option>
+    </select>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <div class="table-header">
+      <h2>Order Register</h2>
+      <span class="table-meta" id="tableMeta">Loading…</span>
+    </div>
+    <div class="tbl-scroll">
+      <table id="mainTable">
+        <thead>
+          <tr>
+            <th onclick="sortTable('ticketNo')">Ticket # <span class="sort-icon">⇅</span></th>
+            <th onclick="sortTable('quoteNo')">Quote # <span class="sort-icon">⇅</span></th>
+            <th onclick="sortTable('poNo')">PO # <span class="sort-icon">⇅</span></th>
+            <th onclick="sortTable('vendor')">Vendor <span class="sort-icon">⇅</span></th>
+            <th>Product Specification</th>
+            <th onclick="sortTable('qty')">Qty <span class="sort-icon">⇅</span></th>
+            <th onclick="sortTable('unitPrice')">Unit Price <span class="sort-icon">⇅</span></th>
+            <th onclick="sortTable('totalExGST')">Total (excl GST) <span class="sort-icon">⇅</span></th>
+            <th onclick="sortTable('totalInGST')">Total (incl GST) <span class="sort-icon">⇅</span></th>
+            <th onclick="sortTable('grnNo')">GRN # <span class="sort-icon">⇅</span></th>
+            <th onclick="sortTable('invoiceNo')">Invoice # <span class="sort-icon">⇅</span></th>
+            <th onclick="sortTable('pnl')">P&L <span class="sort-icon">⇅</span></th>
+            <th>Ticket Raised</th>
+            <th>PO Released</th>
+            <th>Delivery Date</th>
+            <th>Invoice Received</th>
+            <th>Payment Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+    <div class="footer-bar">
+      <span id="footerCount">Showing 0 records</span>
+      <div class="pagination" id="pagination"></div>
+    </div>
+  </div>
+</main>
+
+<!-- ── ANALYTICS MODAL ── -->
+<div class="analytics-overlay" id="analyticsOverlay" onclick="closeAnalyticsOuter(event)">
+  <div class="analytics-modal" id="analyticsModal">
+    <div class="analytics-head">
+      <div>
+        <h2>📊 Procurement Analytics</h2>
+        <p id="analyticsScope">All cycles · All vendors</p>
+      </div>
+      <button class="analytics-close" onclick="closeAnalytics()">✕</button>
+    </div>
+    <div class="analytics-tabs">
+      <button class="a-tab active" onclick="switchTab('spend')">Spend Analysis</button>
+      <button class="a-tab" onclick="switchTab('pnl')">P&amp;L Breakdown</button>
+      <button class="a-tab" onclick="switchTab('pipeline')">Pipeline Status</button>
+      <button class="a-tab" onclick="switchTab('vendor')">Vendor Performance</button>
+    </div>
+    <div class="analytics-body">
+
+      <!-- SPEND TAB -->
+      <div class="chart-section active" id="tab-spend">
+        <div class="insight-row" id="spendInsights"></div>
+        <div class="chart-grid" style="margin-top:20px">
+          <div class="chart-box full">
+            <h4>Monthly Spend Trend</h4>
+            <p>Total order value (excl. GST) per procurement cycle</p>
+            <canvas id="c-spend-trend" height="90"></canvas>
+          </div>
+          <div class="chart-box">
+            <h4>Spend by Vendor</h4>
+            <p>Share of total spend per supplier</p>
+            <canvas id="c-vendor-spend" height="180"></canvas>
+            <div class="legend" id="leg-vendor-spend"></div>
+          </div>
+          <div class="chart-box">
+            <h4>GST Impact</h4>
+            <p>Amount added by GST per order</p>
+            <canvas id="c-gst" height="180"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- PNL TAB -->
+      <div class="chart-section" id="tab-pnl">
+        <div class="insight-row" id="pnlInsights"></div>
+        <div class="chart-grid" style="margin-top:20px">
+          <div class="chart-box full">
+            <h4>P&amp;L by Category</h4>
+            <p>Profit &amp; Loss grouped by procurement category</p>
+            <canvas id="c-pnl-cat" height="90"></canvas>
+          </div>
+          <div class="chart-box full">
+            <h4>Order-wise P&amp;L Waterfall</h4>
+            <p>Individual order contribution (orders with closed P&amp;L)</p>
+            <canvas id="c-pnl-orders" height="100"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- PIPELINE TAB -->
+      <div class="chart-section" id="tab-pipeline">
+        <div class="insight-row" id="pipelineInsights"></div>
+        <div class="chart-grid" style="margin-top:20px">
+          <div class="chart-box">
+            <h4>Orders by Status</h4>
+            <p>Current stage distribution</p>
+            <canvas id="c-status" height="180"></canvas>
+            <div class="legend" id="leg-status"></div>
+          </div>
+          <div class="chart-box">
+            <h4>Lead Time Analysis</h4>
+            <p>Days from Ticket → Delivery per order</p>
+            <canvas id="c-leadtime" height="180"></canvas>
+          </div>
+          <div class="chart-box full">
+            <h4>Payment Calendar Heatmap</h4>
+            <p>Payment due dates and their states across the cycle</p>
+            <canvas id="c-calendar" height="60"></canvas>
+            <div class="legend" style="margin-top:10px">
+              <div class="legend-item"><div class="legend-dot" style="background:#00B67A"></div>Paid/Closed</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#F97316"></div>Due Soon (≤5d)</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#E8392A"></div>Overdue</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#D8E4EE"></div>Upcoming</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VENDOR TAB -->
+      <div class="chart-section" id="tab-vendor">
+        <div class="insight-row" id="vendorInsights"></div>
+        <div class="chart-grid" style="margin-top:20px">
+          <div class="chart-box">
+            <h4>Order Count by Vendor</h4>
+            <p>How many orders per supplier</p>
+            <canvas id="c-vendor-count" height="180"></canvas>
+          </div>
+          <div class="chart-box">
+            <h4>Avg Lead Time by Vendor</h4>
+            <p>Average days from PO to delivery</p>
+            <canvas id="c-vendor-lead" height="180"></canvas>
+          </div>
+          <div class="chart-box full">
+            <h4>Vendor Scorecard</h4>
+            <p>On-time delivery rate and P&amp;L contribution per vendor</p>
+            <canvas id="c-vendor-score" height="80"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ── DETAIL MODAL ── -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modalBox">
+    <div class="modal-head">
+      <div>
+        <h3 id="modalTitle">Order Detail</h3>
+        <div class="ticket-id" id="modalSub"></div>
+      </div>
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+// ──────────────────────────────────────────────
+// MASTER DATA
+// ──────────────────────────────────────────────
+const today = new Date('2025-04-20');
+
+function days(dateStr) {
+  if (!dateStr) return null;
+  return Math.round((new Date(dateStr) - today) / 86400000);
+}
+
+function fmtINR(n) {
+  if (!n && n !== 0) return '—';
+  return '₹' + n.toLocaleString('en-IN');
+}
+
+const ORDERS = [
+  {
+    id: 1, cycle: '2025-04',
+    ticketNo: 'TKT-2504-001', quoteNo: 'QT-2504-V1-001', poNo: 'PO-2504-001',
+    vendor: 'SportGear India Pvt Ltd', product: 'Kipsta Football (Size 5, White/Blue) × 50 pcs',
+    qty: 50, unitPrice: 850, totalExGST: 42500, gst: 18, totalInGST: 50150,
+    grnNo: 'GRN-2504-001', invoiceNo: 'INV-VND-001', pnl: 2200, pnlCategory: 'Sports Equipment P&L',
+    ticketDate: '2025-04-01', poDate: '2025-04-04', deliveryDate: '2025-04-12',
+    invoiceDate: '2025-04-14', paymentDate: '2025-04-30', status: 'Invoiced'
+  },
+  {
+    id: 2, cycle: '2025-04',
+    ticketNo: 'TKT-2504-002', quoteNo: 'QT-2504-V2-002', poNo: 'PO-2504-002',
+    vendor: 'FitEquip Solutions', product: 'Domyos Adjustable Dumbbell Set 5–25 kg',
+    qty: 10, unitPrice: 7200, totalExGST: 72000, gst: 18, totalInGST: 84960,
+    grnNo: 'GRN-2504-002', invoiceNo: 'INV-VND-002', pnl: -1800, pnlCategory: 'Fitness Equipment P&L',
+    ticketDate: '2025-04-02', poDate: '2025-04-05', deliveryDate: '2025-04-15',
+    invoiceDate: '2025-04-17', paymentDate: '2025-04-22', status: 'Invoiced'
+  },
+  {
+    id: 3, cycle: '2025-04',
+    ticketNo: 'TKT-2504-003', quoteNo: 'QT-2504-V3-003', poNo: 'PO-2504-003',
+    vendor: 'TechTrack Pvt Ltd', product: 'Geonaute GPS Running Watch Model R500',
+    qty: 20, unitPrice: 4500, totalExGST: 90000, gst: 18, totalInGST: 106200,
+    grnNo: '', invoiceNo: '', pnl: null, pnlCategory: 'IT Sub-contracting P&L',
+    ticketDate: '2025-04-05', poDate: '2025-04-08', deliveryDate: '2025-04-25',
+    invoiceDate: '', paymentDate: '2025-05-10', status: 'PO Issued'
+  },
+  {
+    id: 4, cycle: '2025-04',
+    ticketNo: 'TKT-2504-004', quoteNo: 'QT-2504-V1-004', poNo: 'PO-2504-004',
+    vendor: 'SportGear India Pvt Ltd', product: 'Kipsta Shin Guards Adult S/M/L (Assorted)',
+    qty: 100, unitPrice: 280, totalExGST: 28000, gst: 12, totalInGST: 31360,
+    grnNo: 'GRN-2504-004', invoiceNo: 'INV-VND-004', pnl: 1400, pnlCategory: 'Sports Equipment P&L',
+    ticketDate: '2025-04-03', poDate: '2025-04-06', deliveryDate: '2025-04-10',
+    invoiceDate: '2025-04-11', paymentDate: '2025-04-18', status: 'Closed'
+  },
+  {
+    id: 5, cycle: '2025-04',
+    ticketNo: 'TKT-2504-005', quoteNo: 'QT-2504-V4-005', poNo: 'PO-2504-005',
+    vendor: 'AquaMaxx Sports', product: 'Nabaiji Swim Goggles UV Protection Pack of 12',
+    qty: 60, unitPrice: 390, totalExGST: 23400, gst: 18, totalInGST: 27612,
+    grnNo: 'GRN-2504-005', invoiceNo: 'INV-VND-005', pnl: -500, pnlCategory: 'Aquatic Gear P&L',
+    ticketDate: '2025-04-06', poDate: '2025-04-09', deliveryDate: '2025-04-14',
+    invoiceDate: '2025-04-16', paymentDate: '2025-04-16', status: 'Invoiced'
+  },
+  {
+    id: 6, cycle: '2025-04',
+    ticketNo: 'TKT-2504-006', quoteNo: 'QT-2504-V5-006', poNo: '',
+    vendor: 'IndoYoga Essentials', product: 'Domyos Yoga Mat 5mm Non-Slip Coral/Purple',
+    qty: 40, unitPrice: 650, totalExGST: 26000, gst: 5, totalInGST: 27300,
+    grnNo: '', invoiceNo: '', pnl: null, pnlCategory: 'Wellness & Yoga P&L',
+    ticketDate: '2025-04-10', poDate: '', deliveryDate: '',
+    invoiceDate: '', paymentDate: '', status: 'Open'
+  },
+  {
+    id: 7, cycle: '2025-03',
+    ticketNo: 'TKT-2503-001', quoteNo: 'QT-2503-V2-001', poNo: 'PO-2503-001',
+    vendor: 'FitEquip Solutions', product: 'Corength Resistance Bands Set (5 Levels)',
+    qty: 80, unitPrice: 320, totalExGST: 25600, gst: 18, totalInGST: 30208,
+    grnNo: 'GRN-2503-001', invoiceNo: 'INV-VND-M3-001', pnl: 3100, pnlCategory: 'Fitness Equipment P&L',
+    ticketDate: '2025-03-02', poDate: '2025-03-05', deliveryDate: '2025-03-12',
+    invoiceDate: '2025-03-14', paymentDate: '2025-03-28', status: 'Closed'
+  },
+  {
+    id: 8, cycle: '2025-03',
+    ticketNo: 'TKT-2503-002', quoteNo: 'QT-2503-V3-002', poNo: 'PO-2503-002',
+    vendor: 'TechTrack Pvt Ltd', product: 'Decathlon Bluetooth Smart Scale Model 900',
+    qty: 15, unitPrice: 2800, totalExGST: 42000, gst: 18, totalInGST: 49560,
+    grnNo: 'GRN-2503-002', invoiceNo: 'INV-VND-M3-002', pnl: 900, pnlCategory: 'IT Sub-contracting P&L',
+    ticketDate: '2025-03-04', poDate: '2025-03-07', deliveryDate: '2025-03-18',
+    invoiceDate: '2025-03-20', paymentDate: '2025-04-04', status: 'Closed'
+  }
+];
+
+// ──────────────────────────────────────────────
+// STATE
+// ──────────────────────────────────────────────
+let filteredData = [...ORDERS];
+let currentPage = 1;
+const PAGE_SIZE = 7;
+let sortKey = 'ticketNo';
+let sortDir = 1;
+let alertFilter = 'all';
+
+// ──────────────────────────────────────────────
+// INIT
+// ──────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  populateVendorFilter();
+  applyFilters();
+  updateKPIs();
+  updateAlertChips();
+});
+
+function populateVendorFilter() {
+  const sel = document.getElementById('vendorFilter');
+  const vendors = [...new Set(ORDERS.map(o => o.vendor))].sort();
+  vendors.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v; opt.textContent = v;
+    sel.appendChild(opt);
+  });
+}
+
+// ──────────────────────────────────────────────
+// FILTERS & RENDER
+// ──────────────────────────────────────────────
+function applyFilters() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const vendor = document.getElementById('vendorFilter').value;
+  const status = document.getElementById('statusFilter').value;
+  const cycle = document.getElementById('cycleSelect').value;
+
+  filteredData = ORDERS.filter(o => {
+    if (cycle !== 'all' && o.cycle !== cycle) return false;
+    if (vendor && o.vendor !== vendor) return false;
+    if (status && o.status !== status) return false;
+    if (alertFilter === 'overdue') {
+      const d = days(o.paymentDate);
+      if (!(o.invoiceNo && d !== null && d < 0)) return false;
+    }
+    if (alertFilter === 'due-soon') {
+      const d = days(o.paymentDate);
+      if (!(o.invoiceNo && d !== null && d >= 0 && d <= 5)) return false;
+    }
+    if (alertFilter === 'pending-grn') {
+      if (!(o.poNo && !o.grnNo)) return false;
+    }
+    if (search) {
+      const hay = [o.ticketNo, o.quoteNo, o.poNo, o.vendor, o.product, o.grnNo, o.invoiceNo].join(' ').toLowerCase();
+      if (!hay.includes(search)) return false;
+    }
+    return true;
+  });
+
+  currentPage = 1;
+  sortData();
+  renderTable();
+}
+
+function filterByCycle() { applyFilters(); updateKPIs(); updateAlertChips(); }
+
+function filterAlerts(type) {
+  alertFilter = type;
+  applyFilters();
+}
+
+function scrollToAlerts() {
+  document.getElementById('alertsSection').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ──────────────────────────────────────────────
+// SORT
+// ──────────────────────────────────────────────
+function sortTable(key) {
+  if (sortKey === key) sortDir *= -1;
+  else { sortKey = key; sortDir = 1; }
+  sortData();
+  renderTable();
+}
+
+function sortData() {
+  filteredData.sort((a, b) => {
+    let va = a[sortKey] ?? '', vb = b[sortKey] ?? '';
+    if (typeof va === 'number') return (va - vb) * sortDir;
+    return String(va).localeCompare(String(vb)) * sortDir;
+  });
+}
+
+// ──────────────────────────────────────────────
+// RENDER TABLE
+// ──────────────────────────────────────────────
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const page = filteredData.slice(start, start + PAGE_SIZE);
+
+  tbody.innerHTML = page.map(o => {
+    const payD = days(o.paymentDate);
+    const delD = days(o.deliveryDate);
+
+    // Row alert class
+    let rowClass = '';
+    if (o.invoiceNo && payD !== null && payD < 0) rowClass = 'row-alert-red';
+    else if (o.invoiceNo && payD !== null && payD >= 0 && payD <= 5) rowClass = 'row-alert-orange';
+
+    // Status badge
+    const statusBadge = {
+      'Open': '<span class="badge badge-gray">Open</span>',
+      'PO Issued': '<span class="badge badge-blue">PO Issued</span>',
+      'Delivered': '<span class="badge badge-yellow">Delivered</span>',
+      'Invoiced': '<span class="badge badge-orange">Invoiced</span>',
+      'Closed': '<span class="badge badge-green">✓ Closed</span>'
+    }[o.status] || `<span class="badge badge-gray">${o.status}</span>`;
+
+    // PNL
+    const pnlCell = o.pnl === null
+      ? `<td><div class="pnl-wrap"><span>—</span><span class="pnl-cat">${o.pnlCategory || ''}</span></div></td>`
+      : o.pnl >= 0
+        ? `<td><div class="pnl-wrap"><span class="pnl-positive amount">+${fmtINR(o.pnl)}</span><span class="pnl-cat">${o.pnlCategory || ''}</span></div></td>`
+        : `<td><div class="pnl-wrap"><span class="pnl-negative amount">${fmtINR(o.pnl)}</span><span class="pnl-cat">${o.pnlCategory || ''}</span></div></td>`;
+
+    // Date helpers
+    function dateCell(dateStr, label, daysFromNow, isPayment) {
+      if (!dateStr) return `<td><div class="date-cell"><span class="d">—</span><span class="d-alert pending">${label}</span></div></td>`;
+      const d = daysFromNow;
+      let alertClass = 'ok', alertText = 'On track';
+      if (isPayment && o.invoiceNo) {
+        if (d < 0) { alertClass = 'overdue'; alertText = `${Math.abs(d)}d overdue`; }
+        else if (d <= 5) { alertClass = 'due-soon'; alertText = `Due in ${d}d`; }
+        else { alertClass = 'ok'; alertText = `In ${d}d`; }
+      } else if (!isPayment && d !== null) {
+        if (d < 0) { alertClass = 'ok'; alertText = 'Completed'; }
+        else if (d <= 3) { alertClass = 'due-soon'; alertText = `In ${d}d`; }
+        else { alertClass = 'ok'; alertText = `In ${d}d`; }
+      }
+      return `<td><div class="date-cell"><span class="d">${dateStr}</span><span class="d-alert ${alertClass}">${alertText}</span></div></td>`;
+    }
+
+    return `<tr class="${rowClass}" onclick="openDetail(${o.id})">
+      <td class="mono">${o.ticketNo}</td>
+      <td class="mono">${o.quoteNo || '—'}</td>
+      <td class="mono">${o.poNo || '—'}</td>
+      <td>${o.vendor}</td>
+      <td style="max-width:200px;white-space:normal;font-size:11px">${o.product}</td>
+      <td>${o.qty}</td>
+      <td class="amount">${fmtINR(o.unitPrice)}</td>
+      <td class="amount">${fmtINR(o.totalExGST)}</td>
+      <td class="amount">${fmtINR(o.totalInGST)}</td>
+      <td class="mono">${o.grnNo || '—'}</td>
+      <td class="mono">${o.invoiceNo || '—'}</td>
+      ${pnlCell}
+      ${dateCell(o.ticketDate, 'Pending', null, false)}
+      ${dateCell(o.poDate, 'Not Released', null, false)}
+      ${dateCell(o.deliveryDate, 'Pending', delD, false)}
+      ${dateCell(o.invoiceDate, 'Not Received', null, false)}
+      ${dateCell(o.paymentDate, 'TBD', payD, true)}
+      <td>${statusBadge}</td>
+      <td>
+        <button class="act-btn" onclick="event.stopPropagation();openDetail(${o.id})">View</button>
+        <button class="act-btn" onclick="event.stopPropagation()">Edit</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('tableMeta').textContent = `${filteredData.length} orders`;
+  document.getElementById('footerCount').textContent = `Showing ${start + 1}–${Math.min(start + PAGE_SIZE, filteredData.length)} of ${filteredData.length} records`;
+  renderPagination();
+}
+
+// ──────────────────────────────────────────────
+// PAGINATION
+// ──────────────────────────────────────────────
+function renderPagination() {
+  const pages = Math.ceil(filteredData.length / PAGE_SIZE);
+  const pg = document.getElementById('pagination');
+  pg.innerHTML = '';
+  for (let i = 1; i <= pages; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'pg-btn' + (i === currentPage ? ' active' : '');
+    btn.textContent = i;
+    btn.onclick = () => { currentPage = i; renderTable(); };
+    pg.appendChild(btn);
+  }
+}
+
+// ──────────────────────────────────────────────
+// KPI CARDS
+// ──────────────────────────────────────────────
+function updateKPIs() {
+  const cycle = document.getElementById('cycleSelect').value;
+  const scope = cycle === 'all' ? ORDERS : ORDERS.filter(o => o.cycle === cycle);
+
+  document.getElementById('kpiOrders').textContent = scope.length;
+  document.getElementById('kpiOpenPO').textContent = scope.filter(o => o.poNo && !o.grnNo).length;
+  document.getElementById('kpiGRN').textContent = scope.filter(o => o.grnNo).length;
+  document.getElementById('kpiOverdue').textContent = scope.filter(o => {
+    const d = days(o.paymentDate);
+    return o.invoiceNo && d !== null && d < 0;
+  }).length;
+
+  const spendEx = scope.reduce((s, o) => s + (o.totalExGST || 0), 0);
+  const spendIn = scope.reduce((s, o) => s + (o.totalInGST || 0), 0);
+  document.getElementById('kpiSpend').textContent = '₹' + (spendEx / 1000).toFixed(0) + 'K';
+  document.getElementById('kpiSpendGST').textContent = '₹' + (spendIn / 1000).toFixed(0) + 'K';
+}
+
+// ──────────────────────────────────────────────
+// ALERT CHIPS
+// ──────────────────────────────────────────────
+function updateAlertChips() {
+  const cycle = document.getElementById('cycleSelect').value;
+  const scope = cycle === 'all' ? ORDERS : ORDERS.filter(o => o.cycle === cycle);
+
+  const overdue = scope.filter(o => { const d = days(o.paymentDate); return o.invoiceNo && d !== null && d < 0; }).length;
+  const soon = scope.filter(o => { const d = days(o.paymentDate); return o.invoiceNo && d !== null && d >= 0 && d <= 5; }).length;
+  const pendingGRN = scope.filter(o => o.poNo && !o.grnNo).length;
+
+  document.getElementById('chipOverdue').textContent = `${overdue} Invoice${overdue !== 1 ? 's' : ''} Overdue`;
+  document.getElementById('chipDueSoon').textContent = `${soon} Payment${soon !== 1 ? 's' : ''} Due Soon`;
+  document.getElementById('chipPendingGRN').textContent = `${pendingGRN} GRN Pending`;
+  document.getElementById('alertBadge').textContent = `${overdue + soon} Alerts`;
+}
+
+// ──────────────────────────────────────────────
+// DETAIL MODAL
+// ──────────────────────────────────────────────
+function openDetail(id) {
+  const o = ORDERS.find(x => x.id === id);
+  if (!o) return;
+  document.getElementById('modalTitle').textContent = o.product.split('×')[0].trim();
+  document.getElementById('modalSub').textContent = `${o.ticketNo}  ·  ${o.vendor}`;
+
+  const payD = days(o.paymentDate);
+
+  const tl = [
+    { label: 'Ticket Raised', date: o.ticketDate, done: !!o.ticketDate },
+    { label: 'Quotation Received', date: o.quoteNo ? o.quoteNo : '', done: !!o.quoteNo, isRef: true },
+    { label: 'PO Released', date: o.poDate, done: !!o.poDate },
+    { label: 'Assets Delivered (GRN)', date: o.deliveryDate, done: !!o.grnNo, overdue: !o.grnNo && o.deliveryDate && days(o.deliveryDate) < 0 },
+    { label: 'Invoice Received', date: o.invoiceDate, done: !!o.invoiceDate },
+    {
+      label: 'Payment to Vendor',
+      date: o.paymentDate,
+      done: o.status === 'Closed',
+      overdue: o.invoiceNo && payD !== null && payD < 0,
+      soon: o.invoiceNo && payD !== null && payD >= 0 && payD <= 5
+    }
+  ];
+
+  const tlHTML = tl.map(t => {
+    const dotClass = t.done ? 'done' : t.overdue ? 'overdue' : t.soon ? 'soon' : 'pending';
+    return `<div class="tl-item">
+      <div class="tl-dot ${dotClass}"></div>
+      <div>
+        <div class="tl-label">${t.label}${t.soon ? ' <b style="color:var(--orange)">— Due Soon!</b>' : ''}${t.overdue ? ' <b style="color:var(--red)">— OVERDUE</b>' : ''}</div>
+        <div class="tl-date">${t.isRef ? t.date : (t.date || 'Pending')}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const pnlColor = o.pnl === null ? '' : o.pnl >= 0 ? 'color:var(--green)' : 'color:var(--red)';
+  const pnlVal = o.pnl === null ? '—' : (o.pnl >= 0 ? '+' : '') + fmtINR(o.pnl);
+
+  document.getElementById('modalBody').innerHTML = `
+    <div class="detail-grid">
+      <div class="detail-item"><label>Ticket Number</label><div class="val">${o.ticketNo}</div></div>
+      <div class="detail-item"><label>Status</label><div class="val">${o.status}</div></div>
+      <div class="detail-item"><label>Quote Number</label><div class="val">${o.quoteNo || '—'}</div></div>
+      <div class="detail-item"><label>PO Number</label><div class="val">${o.poNo || '—'}</div></div>
+      <div class="detail-item"><label>GRN Number</label><div class="val">${o.grnNo || '—'}</div></div>
+      <div class="detail-item"><label>Invoice Number</label><div class="val">${o.invoiceNo || '—'}</div></div>
+      <div class="detail-item"><label>Vendor</label><div class="val">${o.vendor}</div></div>
+      <div class="detail-item"><label>GST Rate</label><div class="val">${o.gst}%</div></div>
+      <div class="detail-item"><label>Quantity</label><div class="val">${o.qty} units</div></div>
+      <div class="detail-item"><label>Unit Price</label><div class="val">${fmtINR(o.unitPrice)}</div></div>
+      <div class="detail-item"><label>Total (excl GST)</label><div class="val">${fmtINR(o.totalExGST)}</div></div>
+      <div class="detail-item"><label>Total (incl GST)</label><div class="val">${fmtINR(o.totalInGST)}</div></div>
+      <div class="detail-item" style="grid-column:1/-1"><label>Product Specification</label><div class="val" style="font-size:13px">${o.product}</div></div>
+      <div class="detail-item"><label>P&amp;L</label><div class="val" style="${pnlColor}">${pnlVal}</div></div>
+      <div class="detail-item"><label>P&amp;L Category</label><div class="val" style="font-size:12px">${o.pnlCategory || '—'}</div></div>
+    </div>
+    <hr class="detail-divider">
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:13px;margin-bottom:12px;color:var(--ink)">Procurement Timeline</div>
+    <div class="timeline-row">${tlHTML}</div>
+    <hr class="detail-divider">
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <a href="quotation.html" class="btn btn-outline" style="text-decoration:none">View Quotation</a>
+      <a href="purchase-order.html" class="btn btn-outline" style="text-decoration:none">View PO</a>
+      <a href="grn.html" class="btn btn-outline" style="text-decoration:none">View GRN</a>
+      <a href="invoice.html" class="btn btn-primary" style="text-decoration:none">View Invoice</a>
+    </div>
+  `;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModalDirect();
+}
+function closeModalDirect() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+// ──────────────────────────────────────────────
+// UTILS
+// ──────────────────────────────────────────────
+function openNewTicket() {
+  alert('+ New Record — connect to your backend to save data.');
+}
+
+// ──────────────────────────────────────────────
+// ANALYTICS ENGINE
+// ──────────────────────────────────────────────
+const PALETTE = ['#0082C3','#00B67A','#F97316','#E8392A','#FFEA00','#3AABDF','#9333EA','#EC4899'];
+
+function openAnalytics() {
+  const cycle = document.getElementById('cycleSelect').value;
+  const scope = cycle === 'all' ? ORDERS : ORDERS.filter(o => o.cycle === cycle);
+  document.getElementById('analyticsScope').textContent =
+    (cycle === 'all' ? 'All cycles' : cycle) + ' · ' + scope.length + ' orders';
+
+  document.getElementById('analyticsOverlay').classList.add('open');
+  setTimeout(() => renderActiveTab(scope), 60);
+}
+
+function closeAnalytics() {
+  document.getElementById('analyticsOverlay').classList.remove('open');
+}
+function closeAnalyticsOuter(e) {
+  if (e.target === document.getElementById('analyticsOverlay')) closeAnalytics();
+}
+
+let currentTab = 'spend';
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.a-tab').forEach((t,i) => {
+    t.classList.toggle('active', ['spend','pnl','pipeline','vendor'][i] === tab);
+  });
+  document.querySelectorAll('.chart-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  const cycle = document.getElementById('cycleSelect').value;
+  const scope = cycle === 'all' ? ORDERS : ORDERS.filter(o => o.cycle === cycle);
+  setTimeout(() => renderActiveTab(scope), 40);
+}
+
+function renderActiveTab(scope) {
+  if (currentTab === 'spend') renderSpend(scope);
+  if (currentTab === 'pnl') renderPNL(scope);
+  if (currentTab === 'pipeline') renderPipeline(scope);
+  if (currentTab === 'vendor') renderVendor(scope);
+}
+
+// ── CANVAS HELPERS ──────────────────
+function getCtx(id) {
+  const c = document.getElementById(id);
+  c.width = c.parentElement.clientWidth - 40;
+  return { ctx: c.getContext('2d'), W: c.width, H: c.height };
+}
+
+function drawBarChart({ctx, W, H, labels, values, colors, showValues, prefix}) {
+  ctx.clearRect(0, 0, W, H);
+  const pad = { t:10, r:10, b:32, l:56 };
+  const cW = W - pad.l - pad.r, cH = H - pad.t - pad.b;
+  const max = Math.max(...values.map(Math.abs), 1);
+  const barW = Math.min(40, (cW / labels.length) * 0.6);
+  const gap = cW / labels.length;
+
+  // Grid
+  ctx.strokeStyle = '#D8E4EE'; ctx.lineWidth = 1;
+  [0, 0.25, 0.5, 0.75, 1].forEach(f => {
+    const y = pad.t + cH * (1 - f);
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + cW, y); ctx.stroke();
+    ctx.fillStyle = '#5E738A'; ctx.font = '9px DM Mono, monospace'; ctx.textAlign = 'right';
+    const v = max * f;
+    ctx.fillText((prefix||'') + (v >= 1000 ? (v/1000).toFixed(0)+'K' : v.toFixed(0)), pad.l - 4, y + 3);
+  });
+
+  // Bars
+  labels.forEach((lbl, i) => {
+    const val = values[i] || 0;
+    const x = pad.l + gap * i + gap/2 - barW/2;
+    const bH = (Math.abs(val) / max) * cH;
+    const y = val >= 0 ? pad.t + cH - bH : pad.t;
+    ctx.fillStyle = colors[i % colors.length];
+    roundRect(ctx, x, y, barW, bH, 4);
+    ctx.fill();
+    if (showValues) {
+      ctx.fillStyle = '#0A1628'; ctx.font = '9px DM Mono, monospace'; ctx.textAlign = 'center';
+      ctx.fillText((prefix||'') + (Math.abs(val) >= 1000 ? (val/1000).toFixed(1)+'K' : val), x + barW/2, y - 4);
+    }
+    ctx.fillStyle = '#5E738A'; ctx.font = '9px DM Mono, monospace'; ctx.textAlign = 'center';
+    const shortLbl = lbl.length > 10 ? lbl.slice(0,9)+'…' : lbl;
+    ctx.fillText(shortLbl, x + barW/2, pad.t + cH + 16);
+  });
+}
+
+function drawLineChart({ctx, W, H, labels, datasets}) {
+  ctx.clearRect(0, 0, W, H);
+  const pad = { t:14, r:16, b:30, l:56 };
+  const cW = W - pad.l - pad.r, cH = H - pad.t - pad.b;
+  const allVals = datasets.flatMap(d => d.values);
+  const max = Math.max(...allVals, 1), min = Math.min(...allVals, 0);
+  const range = max - min || 1;
+
+  // Grid
+  ctx.strokeStyle = '#D8E4EE'; ctx.lineWidth = 1;
+  [0, 0.25, 0.5, 0.75, 1].forEach(f => {
+    const y = pad.t + cH * (1 - f);
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + cW, y); ctx.stroke();
+    const v = min + range * f;
+    ctx.fillStyle = '#5E738A'; ctx.font = '9px DM Mono, monospace'; ctx.textAlign = 'right';
+    ctx.fillText('₹' + (v >= 1000 ? (v/1000).toFixed(0)+'K' : v.toFixed(0)), pad.l - 4, y + 3);
+  });
+
+  // Lines
+  datasets.forEach((ds, di) => {
+    const pts = ds.values.map((v, i) => ({
+      x: pad.l + (i / (labels.length - 1 || 1)) * cW,
+      y: pad.t + cH - ((v - min) / range) * cH
+    }));
+    // Area fill
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, pad.t + cH);
+    pts.forEach(p => ctx.lineTo(p.x, p.y));
+    ctx.lineTo(pts[pts.length-1].x, pad.t + cH);
+    ctx.closePath();
+    ctx.fillStyle = ds.color + '22';
+    ctx.fill();
+    // Line
+    ctx.beginPath();
+    pts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+    ctx.strokeStyle = ds.color; ctx.lineWidth = 2.5; ctx.stroke();
+    // Dots
+    pts.forEach(p => {
+      ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI*2);
+      ctx.fillStyle = ds.color; ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, Math.PI*2); ctx.fill();
+    });
+    // Labels
+    labels.forEach((lbl, i) => {
+      ctx.fillStyle = '#5E738A'; ctx.font = '9px DM Mono, monospace'; ctx.textAlign = 'center';
+      ctx.fillText(lbl, pts[i].x, pad.t + cH + 16);
+    });
+  });
+}
+
+function drawDonutChart({ctx, W, H, labels, values, colors, legendEl}) {
+  ctx.clearRect(0, 0, W, H);
+  const cx = W / 2, cy = H / 2, r = Math.min(W, H) / 2 - 16, inner = r * 0.55;
+  const total = values.reduce((a, b) => a + b, 0) || 1;
+  let angle = -Math.PI / 2;
+  values.forEach((v, i) => {
+    const slice = (v / total) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, angle, angle + slice);
+    ctx.closePath();
+    ctx.fillStyle = colors[i % colors.length]; ctx.fill();
+    angle += slice;
+  });
+  // Inner hole
+  ctx.beginPath(); ctx.arc(cx, cy, inner, 0, Math.PI*2);
+  ctx.fillStyle = '#F4F8FC'; ctx.fill();
+  // Centre text
+  ctx.fillStyle = '#0A1628'; ctx.font = 'bold 13px Syne, sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText(values.length, cx, cy + 2);
+  ctx.fillStyle = '#5E738A'; ctx.font = '9px DM Mono, monospace';
+  ctx.fillText('vendors', cx, cy + 14);
+  // Legend
+  if (legendEl) {
+    legendEl.innerHTML = labels.map((l, i) =>
+      `<div class="legend-item"><div class="legend-dot" style="background:${colors[i%colors.length]}"></div>${l} (₹${(values[i]/1000).toFixed(0)}K)</div>`
+    ).join('');
+  }
+}
+
+function drawHBarChart({ctx, W, H, labels, values, colors, prefix}) {
+  ctx.clearRect(0, 0, W, H);
+  const pad = {t:8, r:60, b:8, l:120};
+  const cW = W - pad.l - pad.r, cH = H - pad.t - pad.b;
+  const max = Math.max(...values.map(Math.abs), 1);
+  const rowH = cH / labels.length;
+  const barH = Math.min(22, rowH * 0.55);
+
+  labels.forEach((lbl, i) => {
+    const val = values[i] || 0;
+    const bW = (Math.abs(val) / max) * cW;
+    const y = pad.t + rowH * i + rowH/2 - barH/2;
+    ctx.fillStyle = colors[i % colors.length];
+    roundRect(ctx, pad.l, y, bW, barH, 4); ctx.fill();
+    ctx.fillStyle = '#2D3F56'; ctx.font = '10px DM Mono, monospace'; ctx.textAlign = 'right';
+    ctx.fillText(lbl.length > 14 ? lbl.slice(0,13)+'…' : lbl, pad.l - 6, y + barH/2 + 3);
+    ctx.fillStyle = '#0A1628'; ctx.font = '10px DM Mono, monospace'; ctx.textAlign = 'left';
+    ctx.fillText((prefix||'') + (Math.abs(val) >= 1000 ? (val/1000).toFixed(1)+'K' : val), pad.l + bW + 6, y + barH/2 + 3);
+  });
+}
+
+function drawCalendarBar({ctx, W, H, orders}) {
+  ctx.clearRect(0, 0, W, H);
+  const relevant = orders.filter(o => o.paymentDate);
+  if (!relevant.length) { ctx.fillStyle='#5E738A'; ctx.font='11px DM Mono'; ctx.fillText('No payment dates in this scope.', 10, H/2); return; }
+  const bW = Math.max(20, Math.min(40, (W - 20) / relevant.length - 6));
+  relevant.forEach((o, i) => {
+    const d = days(o.paymentDate);
+    let color = '#D8E4EE';
+    if (o.status === 'Closed') color = '#00B67A';
+    else if (o.invoiceNo && d < 0) color = '#E8392A';
+    else if (o.invoiceNo && d <= 5) color = '#F97316';
+    else color = '#3AABDF';
+    const x = 10 + i * (bW + 6);
+    roundRect(ctx, x, 10, bW, H - 30, 5); ctx.fillStyle = color; ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 9px DM Mono, monospace'; ctx.textAlign = 'center';
+    ctx.fillText(o.paymentDate.slice(5), x + bW/2, H - 16);
+  });
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  if (w < 2*r) r = w/2; if (h < 2*r) r = h/2;
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.arcTo(x+w,y, x+w,y+h, r);
+  ctx.arcTo(x+w,y+h, x,y+h, r);
+  ctx.arcTo(x,y+h, x,y, r);
+  ctx.arcTo(x,y, x+w,y, r);
+  ctx.closePath();
+}
+
+function insightCard(label, value, sub) {
+  return `<div class="insight-card"><div class="i-label">${label}</div><div class="i-val">${value}</div><div class="i-sub">${sub}</div></div>`;
+}
+
+// ── SPEND TAB ───────────────────────
+function renderSpend(scope) {
+  // Insights
+  const totalEx = scope.reduce((s,o)=>s+o.totalExGST,0);
+  const totalIn = scope.reduce((s,o)=>s+o.totalInGST,0);
+  const avgOrder = totalEx / (scope.length || 1);
+  const topVend = topBy(scope, o => o.totalExGST, 'vendor');
+  document.getElementById('spendInsights').innerHTML =
+    insightCard('Total Spend (excl GST)', '₹'+fmt(totalEx), 'across '+scope.length+' orders') +
+    insightCard('Total GST Outflow', '₹'+fmt(totalIn - totalEx), 'tax paid to vendors') +
+    insightCard('Avg Order Value', '₹'+fmt(Math.round(avgOrder)), 'per order') +
+    insightCard('Top Vendor', topVend.key, '₹'+fmt(topVend.val)+' spend');
+
+  // Trend by cycle
+  const cycles = [...new Set(ORDERS.map(o=>o.cycle))].sort();
+  const trendVals = cycles.map(c => ORDERS.filter(o=>o.cycle===c).reduce((s,o)=>s+o.totalExGST,0));
+  const {ctx: c1, W: w1, H: h1} = getCtx('c-spend-trend');
+  drawLineChart({ctx:c1,W:w1,H:h1, labels:cycles, datasets:[{values:trendVals,color:'#0082C3'}]});
+
+  // Vendor spend donut
+  const vendors = [...new Set(scope.map(o=>o.vendor))];
+  const vSpend = vendors.map(v => scope.filter(o=>o.vendor===v).reduce((s,o)=>s+o.totalExGST,0));
+  const {ctx: c2, W: w2, H: h2} = getCtx('c-vendor-spend');
+  drawDonutChart({ctx:c2,W:w2,H:h2,labels:vendors,values:vSpend,colors:PALETTE,legendEl:document.getElementById('leg-vendor-spend')});
+
+  // GST bar
+  const {ctx: c3, W: w3, H: h3} = getCtx('c-gst');
+  const gstVals = scope.map(o => o.totalInGST - o.totalExGST);
+  drawBarChart({ctx:c3,W:w3,H:h3,labels:scope.map(o=>o.ticketNo.slice(-3)),values:gstVals,colors:['#3AABDF'],prefix:'₹'});
+}
+
+// ── PNL TAB ─────────────────────────
+function renderPNL(scope) {
+  const withPNL = scope.filter(o => o.pnl !== null);
+  const totalPNL = withPNL.reduce((s,o)=>s+o.pnl,0);
+  const wins = withPNL.filter(o=>o.pnl>0).length;
+  const losses = withPNL.filter(o=>o.pnl<0).length;
+  const bestOrder = withPNL.sort((a,b)=>b.pnl-a.pnl)[0];
+
+  document.getElementById('pnlInsights').innerHTML =
+    insightCard('Net P&L', (totalPNL>=0?'+':'')+'₹'+fmt(Math.abs(totalPNL)), totalPNL>=0?'Surplus':'Deficit') +
+    insightCard('Profitable Orders', wins + ' / ' + withPNL.length, 'win rate '+(withPNL.length?Math.round(wins/withPNL.length*100):0)+'%') +
+    insightCard('Loss Orders', losses + '', 'require review') +
+    (bestOrder ? insightCard('Best Order', bestOrder.ticketNo, '+₹'+fmt(bestOrder.pnl)) : '');
+
+  // By category
+  const cats = [...new Set(scope.map(o=>o.pnlCategory))];
+  const catPNL = cats.map(cat => scope.filter(o=>o.pnlCategory===cat && o.pnl!==null).reduce((s,o)=>s+o.pnl,0));
+  const {ctx:c1,W:w1,H:h1} = getCtx('c-pnl-cat');
+  drawBarChart({ctx:c1,W:w1,H:h1,labels:cats,values:catPNL,colors:catPNL.map(v=>v>=0?'#00B67A':'#E8392A'),showValues:true,prefix:'₹'});
+
+  // Order waterfall
+  const ordersWithPNL = scope.filter(o=>o.pnl!==null);
+  const {ctx:c2,W:w2,H:h2} = getCtx('c-pnl-orders');
+  drawBarChart({ctx:c2,W:w2,H:h2,
+    labels:ordersWithPNL.map(o=>o.ticketNo.slice(-3)),
+    values:ordersWithPNL.map(o=>o.pnl),
+    colors:ordersWithPNL.map(o=>o.pnl>=0?'#00B67A':'#E8392A'),
+    showValues:true,prefix:'₹'});
+}
+
+// ── PIPELINE TAB ────────────────────
+function renderPipeline(scope) {
+  const statuses = ['Open','PO Issued','Delivered','Invoiced','Closed'];
+  const statusCounts = statuses.map(s => scope.filter(o=>o.status===s).length);
+  const avgLead = avg(scope.filter(o=>o.ticketDate&&o.deliveryDate).map(o=>diffDays(o.ticketDate,o.deliveryDate)));
+  const onTime = scope.filter(o=>o.grnNo && o.deliveryDate && diffDays(o.poDate,o.deliveryDate) <= 14).length;
+
+  document.getElementById('pipelineInsights').innerHTML =
+    insightCard('Open Orders', scope.filter(o=>o.status==='Open').length, 'awaiting PO') +
+    insightCard('Avg Lead Time', Math.round(avgLead||0)+' days', 'ticket to delivery') +
+    insightCard('Cycle Completion', scope.filter(o=>o.status==='Closed').length + ' closed', 'of '+scope.length+' orders') +
+    insightCard('On-time Delivery', onTime+'', 'within 14d of PO');
+
+  // Status donut
+  const {ctx:c1,W:w1,H:h1} = getCtx('c-status');
+  const statusColors = ['#5E738A','#0082C3','#FFEA00','#F97316','#00B67A'];
+  drawDonutChart({ctx:c1,W:w1,H:h1,labels:statuses,values:statusCounts,colors:statusColors,legendEl:document.getElementById('leg-status')});
+
+  // Lead time per order
+  const ltOrders = scope.filter(o=>o.ticketDate&&o.deliveryDate);
+  const {ctx:c2,W:w2,H:h2} = getCtx('c-leadtime');
+  drawBarChart({ctx:c2,W:w2,H:h2,
+    labels:ltOrders.map(o=>o.ticketNo.slice(-3)),
+    values:ltOrders.map(o=>diffDays(o.ticketDate,o.deliveryDate)),
+    colors:ltOrders.map(o=>diffDays(o.ticketDate,o.deliveryDate)>14?'#F97316':'#00B67A'),
+    showValues:true});
+
+  // Calendar
+  const {ctx:c3,W:w3,H:h3} = getCtx('c-calendar');
+  drawCalendarBar({ctx:c3,W:w3,H:h3,orders:scope});
+}
+
+// ── VENDOR TAB ──────────────────────
+function renderVendor(scope) {
+  const vendors = [...new Set(scope.map(o=>o.vendor))];
+  const vCounts = vendors.map(v=>scope.filter(o=>o.vendor===v).length);
+  const topV = vendors[vCounts.indexOf(Math.max(...vCounts))];
+
+  document.getElementById('vendorInsights').innerHTML =
+    insightCard('Active Vendors', vendors.length, 'this scope') +
+    insightCard('Top Vendor', topV||'—', vCounts[vendors.indexOf(topV)]+' orders') +
+    insightCard('Avg Orders/Vendor', (scope.length/Math.max(vendors.length,1)).toFixed(1), 'concentration ratio') +
+    insightCard('Vendor Diversity', vendors.length >= 4 ? 'Healthy' : 'Low', vendors.length < 3 ? 'consider more vendors':'diversified');
+
+  // Count bar
+  const {ctx:c1,W:w1,H:h1} = getCtx('c-vendor-count');
+  drawHBarChart({ctx:c1,W:w1,H:h1,labels:vendors,values:vCounts,colors:PALETTE});
+
+  // Avg lead time bar
+  const vLead = vendors.map(v => {
+    const os = scope.filter(o=>o.vendor===v&&o.poDate&&o.deliveryDate);
+    return os.length ? avg(os.map(o=>diffDays(o.poDate,o.deliveryDate))) : 0;
+  });
+  const {ctx:c2,W:w2,H:h2} = getCtx('c-vendor-lead');
+  drawHBarChart({ctx:c2,W:w2,H:h2,labels:vendors,values:vLead.map(Math.round),colors:vLead.map(v=>v>14?'#F97316':'#00B67A')});
+
+  // Scorecard bar (spend)
+  const vSpend = vendors.map(v=>scope.filter(o=>o.vendor===v).reduce((s,o)=>s+o.totalExGST,0));
+  const {ctx:c3,W:w3,H:h3} = getCtx('c-vendor-score');
+  drawHBarChart({ctx:c3,W:w3,H:h3,labels:vendors,values:vSpend,colors:PALETTE,prefix:'₹'});
+}
+
+// ── MICRO UTILS ─────────────────────
+function fmt(n) { return n >= 1000 ? (n/1000).toFixed(1)+'K' : String(n); }
+function avg(arr) { return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0; }
+function diffDays(a,b) { return Math.round((new Date(b)-new Date(a))/86400000); }
+function topBy(arr, valFn, keyField) {
+  const map = {};
+  arr.forEach(o => { const k = o[keyField]; map[k] = (map[k]||0) + valFn(o); });
+  const best = Object.entries(map).sort((a,b)=>b[1]-a[1])[0];
+  return best ? {key:best[0], val:best[1]} : {key:'—',val:0};
+}
+
+function exportCSV() {
+  const headers = ['Ticket#','Quote#','PO#','Vendor','Product','Qty','UnitPrice','TotalExGST','TotalInGST','GRN#','Invoice#','PNL','TicketDate','PODate','DeliveryDate','InvoiceDate','PaymentDate','Status'];
+  const rows = filteredData.map(o => [
+    o.ticketNo, o.quoteNo, o.poNo, `"${o.vendor}"`, `"${o.product}"`,
+    o.qty, o.unitPrice, o.totalExGST, o.totalInGST,
+    o.grnNo, o.invoiceNo, o.pnl,
+    o.ticketDate, o.poDate, o.deliveryDate, o.invoiceDate, o.paymentDate, o.status
+  ].join(','));
+  const csv = [headers.join(','), ...rows].join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv,' + encodeURIComponent(csv);
+  a.download = 'decathlon_procurement.csv';
+  a.click();
+}
+</script>
+</body>
+</html>
