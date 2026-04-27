@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Decathlon Procurement — GRN</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#0082C3;--blue-dark:#005F8E;--blue-light:#E6F4FB;--blue-mid:#3AABDF;--yellow:#FFEA00;--yellow-light:#FFFBE0;--green:#00B67A;--green-light:#E0F7EE;--red:#E8392A;--red-light:#FDECEA;--orange:#F97316;--orange-light:#FEF0E6;--ink:#0A1628;--ink-mid:#2D3F56;--ink-soft:#5E738A;--line:#D8E4EE;--surface:#F4F8FC;--white:#FFFFFF;--radius:10px;--shadow:0 2px 16px rgba(0,130,195,0.08)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Mono',monospace;background:var(--surface);color:var(--ink);min-height:100vh}
+nav{background:var(--ink);display:flex;align-items:center;padding:0 32px;height:60px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.18)}
+.nav-brand{display:flex;align-items:center;gap:10px;margin-right:36px;text-decoration:none}
+.nav-logo{width:34px;height:34px;background:var(--yellow);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:15px;color:var(--ink)}
+.nav-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:var(--white)}.nav-title span{color:var(--blue-mid)}
+.nav-links{display:flex;gap:2px}
+.nav-link{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:rgba(255,255,255,0.6);text-decoration:none;padding:8px 16px;border-radius:6px;transition:all 0.18s;letter-spacing:0.5px;text-transform:uppercase}
+.nav-link:hover{background:rgba(255,255,255,0.07);color:var(--white)}.nav-link.active{background:var(--blue);color:var(--white)}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.nav-badge{background:var(--red);color:#fff;font-size:10px;padding:3px 8px;border-radius:20px;cursor:pointer}
+.nav-avatar{width:32px;height:32px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:#fff}
+.page-header{background:var(--white);border-bottom:1px solid var(--line);padding:20px 36px 16px;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.page-header h1{font-family:'Syne',sans-serif;font-weight:800;font-size:22px;color:var(--ink)}
+.page-header p{font-size:12px;color:var(--ink-soft);margin-top:2px}
+.header-controls{display:flex;gap:10px;align-items:center}
+.btn{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;padding:8px 16px;border-radius:7px;border:none;cursor:pointer;transition:all 0.16s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:var(--blue-dark)}
+.btn-outline{background:transparent;border:1.5px solid var(--line);color:var(--ink-mid)}.btn-outline:hover{border-color:var(--blue);color:var(--blue)}
+.btn-green{background:var(--green);color:#fff}.btn-sm{padding:5px 11px;font-size:11px}
+main{padding:28px 36px 48px;max-width:1600px;margin:0 auto}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px}
+.kpi-card{background:var(--white);border-radius:var(--radius);padding:16px 18px;border:1.5px solid var(--line);box-shadow:var(--shadow);position:relative;overflow:hidden}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--blue)}
+.kpi-card.yellow::before{background:var(--yellow)}.kpi-card.green::before{background:var(--green)}.kpi-card.red::before{background:var(--red)}.kpi-card.orange::before{background:var(--orange)}
+.kpi-label{font-size:10px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+.kpi-value{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--ink);line-height:1}
+.kpi-sub{font-size:10px;color:var(--ink-soft);margin-top:4px}
+
+/* QC Inspection panel */
+.qc-panel{background:var(--white);border:1.5px solid var(--line);border-radius:var(--radius);padding:18px 24px;margin-bottom:22px;box-shadow:var(--shadow)}
+.qc-panel h3{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--ink);margin-bottom:12px}
+.qc-bars{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-end}
+.qc-bar-wrap{flex:1;min-width:120px}
+.qc-bar-label{font-size:10px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px}
+.qc-bar-track{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.qc-bar-fill{height:100%;border-radius:4px;transition:width 0.6s ease}
+.qc-bar-val{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:var(--ink);margin-top:5px}
+
+.filter-row{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.search-box{position:relative;flex:1;min-width:200px}
+.search-box input{width:100%;font-family:'DM Mono',monospace;font-size:12px;padding:8px 12px 8px 32px;border:1.5px solid var(--line);border-radius:7px;background:var(--white);color:var(--ink);outline:none;transition:border 0.15s}
+.search-box input:focus{border-color:var(--blue)}
+.search-box svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);opacity:0.4}
+.filter-select{font-family:'DM Mono',monospace;font-size:12px;border:1.5px solid var(--line);border-radius:7px;padding:8px 12px;background:var(--white);color:var(--ink);cursor:pointer;outline:none}
+.table-wrap{background:var(--white);border-radius:var(--radius);border:1.5px solid var(--line);box-shadow:var(--shadow);overflow:hidden}
+.table-header{padding:14px 18px;border-bottom:1.5px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.table-header h2{font-family:'Syne',sans-serif;font-weight:700;font-size:14px}
+.tbl-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:11.5px;min-width:1100px}
+thead tr{background:var(--surface)}
+th{padding:10px 12px;text-align:left;font-family:'DM Mono',monospace;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.8px;color:var(--ink-soft);white-space:nowrap;border-bottom:1.5px solid var(--line);cursor:pointer;user-select:none}
+th:hover{color:var(--blue)}
+tbody tr{border-bottom:1px solid var(--line);transition:background 0.12s;cursor:pointer}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--blue-light)}
+tbody tr.row-issue{background:#fff5f4}
+td{padding:11px 12px;color:var(--ink-mid);white-space:nowrap;vertical-align:middle}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:500}
+.badge-blue{background:var(--blue-light);color:var(--blue)}.badge-green{background:var(--green-light);color:var(--green)}
+.badge-red{background:var(--red-light);color:var(--red)}.badge-orange{background:var(--orange-light);color:var(--orange)}
+.badge-yellow{background:var(--yellow-light);color:#9a7d00}.badge-gray{background:#f0f2f5;color:#6b7a8d}
+.amount{font-family:'DM Mono',monospace}
+.act-btn{font-size:10px;padding:4px 9px;border-radius:5px;border:1.5px solid var(--line);background:transparent;cursor:pointer;color:var(--ink-mid);font-family:'DM Mono',monospace;transition:all 0.14s;margin-right:3px}
+.act-btn:hover{border-color:var(--blue);color:var(--blue)}
+.qty-cell{display:flex;flex-direction:column;gap:1px}
+.qty-ord{font-size:11px;color:var(--ink-mid)}.qty-recv{font-size:9px;font-weight:500}
+.qty-full{color:var(--green)}.qty-partial{color:var(--orange)}.qty-short{color:var(--red)}
+.footer-bar{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-top:1.5px solid var(--line);background:var(--surface);font-size:11px;color:var(--ink-soft)}
+.pagination{display:flex;gap:4px}
+.pg-btn{padding:5px 11px;border-radius:5px;border:1.5px solid var(--line);background:var(--white);cursor:pointer;font-size:11px;font-family:'DM Mono',monospace;color:var(--ink-mid);transition:all 0.14s}
+.pg-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.pg-btn:hover:not(.active){border-color:var(--blue);color:var(--blue)}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(10,22,40,0.55);z-index:300;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--white);border-radius:14px;width:90%;max-width:820px;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.22);animation:slideUp 0.22s ease}
+@keyframes slideUp{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-head{padding:22px 26px 16px;border-bottom:1.5px solid var(--line);display:flex;align-items:flex-start;justify-content:space-between;position:sticky;top:0;background:var(--white);z-index:2}
+.modal-head h3{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;color:var(--ink)}
+.modal-sub{font-size:11px;color:var(--ink-soft);margin-top:2px}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--ink-soft)}
+.modal-close:hover{color:var(--ink)}
+.modal-body{padding:22px 26px}
+.grn-doc{border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+.grn-head{background:var(--green);color:#fff;padding:20px 24px;display:flex;justify-content:space-between;align-items:flex-start}
+.grn-brand{font-family:'Syne',sans-serif;font-weight:800;font-size:17px}
+.grn-meta{text-align:right;font-size:11px;opacity:0.85;line-height:1.8}
+.grn-body{padding:20px 24px}
+.grn-info{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.grn-info-item label{font-size:9px;text-transform:uppercase;letter-spacing:0.8px;color:var(--ink-soft);display:block;margin-bottom:3px}
+.grn-info-item .val{font-size:12px;font-weight:500;color:var(--ink)}
+.grn-table{width:100%;border-collapse:collapse;font-size:11.5px;margin-bottom:14px}
+.grn-table th{background:var(--surface);padding:9px 12px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:var(--ink-soft);border-bottom:1.5px solid var(--line)}
+.grn-table td{padding:9px 12px;border-bottom:1px solid var(--line)}
+.grn-table td.ok{color:var(--green);font-weight:500}.grn-table td.warn{color:var(--orange)}.grn-table td.fail{color:var(--red);font-weight:500}
+.qc-section{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.qc-checks{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:10px}
+.qc-check{border:1.5px solid var(--line);border-radius:8px;padding:10px 12px}
+.qc-check.pass{border-color:var(--green);background:var(--green-light)}
+.qc-check.fail{border-color:var(--red);background:var(--red-light)}
+.qc-check.na{border-color:var(--line);background:var(--surface)}
+.qc-check-label{font-size:9px;text-transform:uppercase;letter-spacing:0.5px;color:var(--ink-soft);margin-bottom:4px}
+.qc-check-val{font-size:12px;font-weight:500;color:var(--ink)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1/-1}
+.form-group label{font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:var(--ink-soft)}
+.form-group input,.form-group select,.form-group textarea{font-family:'DM Mono',monospace;font-size:12px;padding:9px 12px;border:1.5px solid var(--line);border-radius:7px;background:var(--white);color:var(--ink);outline:none;transition:border 0.15s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--blue)}
+.form-group textarea{resize:vertical;min-height:60px}
+.recv-table{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:6px;border:1.5px solid var(--line);border-radius:8px;overflow:hidden}
+.recv-table th{background:var(--surface);padding:9px 12px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:var(--ink-soft);border-bottom:1.5px solid var(--line)}
+.recv-table td{padding:8px 12px;border-bottom:1px solid var(--line)}
+.recv-table td input{width:100%;font-family:'DM Mono',monospace;font-size:11px;padding:5px 8px;border:1.5px solid var(--line);border-radius:5px;outline:none}
+.recv-table td input:focus{border-color:var(--blue)}
+.recv-table td select{font-family:'DM Mono',monospace;font-size:11px;padding:5px 8px;border:1.5px solid var(--line);border-radius:5px;outline:none;background:var(--white)}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-brand">
+    <div class="nav-logo">D</div>
+    <span class="nav-title">Decathlon <span>Procurement</span></span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link">Dashboard</a>
+    <a href="quotation.html" class="nav-link">Quotation</a>
+    <a href="purchase-order.html" class="nav-link">Purchase Order</a>
+    <a href="grn.html" class="nav-link active">GRN</a>
+    <a href="invoice.html" class="nav-link">Invoice</a>
+  </div>
+  <div class="nav-right">
+    <span class="nav-badge">3 Alerts</span>
+    <div class="nav-avatar">PT</div>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div>
+    <h1>Goods Receipt Note (GRN)</h1>
+    <p>Inspect & acknowledge delivery · QC checks · Discrepancy management</p>
+  </div>
+  <div class="header-controls">
+    <button class="btn btn-outline" onclick="exportCSV()">⬇ Export</button>
+    <button class="btn btn-primary" onclick="openNewGRN()">+ Create GRN</button>
+  </div>
+</div>
+
+<main>
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-label">Total GRNs</div><div class="kpi-value" id="kTotal">—</div><div class="kpi-sub">All cycles</div></div>
+    <div class="kpi-card green"><div class="kpi-label">Accepted</div><div class="kpi-value" id="kAccepted">—</div><div class="kpi-sub">Full & partial</div></div>
+    <div class="kpi-card red"><div class="kpi-label">With Issues</div><div class="kpi-value" id="kIssues">—</div><div class="kpi-sub">Damage / shortage</div></div>
+    <div class="kpi-card orange"><div class="kpi-label">Partial Receipts</div><div class="kpi-value" id="kPartial">—</div><div class="kpi-sub">Pending balance</div></div>
+    <div class="kpi-card yellow"><div class="kpi-label">Debit Notes Raised</div><div class="kpi-value" id="kDebit">—</div><div class="kpi-sub">For discrepancies</div></div>
+    <div class="kpi-card"><div class="kpi-label">Total Value Received</div><div class="kpi-value" id="kValue">—</div><div class="kpi-sub">excl. GST</div></div>
+  </div>
+
+  <!-- QC Summary -->
+  <div class="qc-panel">
+    <h3>🔍 QC Inspection Summary — Current Scope</h3>
+    <div class="qc-bars">
+      <div class="qc-bar-wrap">
+        <div class="qc-bar-label">Quantity Accuracy</div>
+        <div class="qc-bar-track"><div class="qc-bar-fill" id="qcQty" style="background:var(--green);width:0%"></div></div>
+        <div class="qc-bar-val" id="qcQtyVal">—</div>
+      </div>
+      <div class="qc-bar-wrap">
+        <div class="qc-bar-label">Quality / No Damage</div>
+        <div class="qc-bar-track"><div class="qc-bar-fill" id="qcQual" style="background:var(--blue);width:0%"></div></div>
+        <div class="qc-bar-val" id="qcQualVal">—</div>
+      </div>
+      <div class="qc-bar-wrap">
+        <div class="qc-bar-label">Brand / Spec Match</div>
+        <div class="qc-bar-track"><div class="qc-bar-fill" id="qcSpec" style="background:var(--orange);width:0%"></div></div>
+        <div class="qc-bar-val" id="qcSpecVal">—</div>
+      </div>
+      <div class="qc-bar-wrap">
+        <div class="qc-bar-label">On-time Delivery</div>
+        <div class="qc-bar-track"><div class="qc-bar-fill" id="qcTime" style="background:var(--yellow);width:0%"></div></div>
+        <div class="qc-bar-val" id="qcTimeVal">—</div>
+      </div>
+      <div class="qc-bar-wrap">
+        <div class="qc-bar-label">Documentation OK</div>
+        <div class="qc-bar-track"><div class="qc-bar-fill" id="qcDoc" style="background:var(--green);width:0%"></div></div>
+        <div class="qc-bar-val" id="qcDocVal">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="filter-row">
+    <div class="search-box">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0A1628" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="srch" placeholder="Search GRN, PO, vendor…" oninput="render()">
+    </div>
+    <select class="filter-select" id="vendF" onchange="render()">
+      <option value="">All Vendors</option>
+      <option>SportGear India Pvt Ltd</option><option>FitEquip Solutions</option>
+      <option>TechTrack Pvt Ltd</option><option>AquaMaxx Sports</option>
+    </select>
+    <select class="filter-select" id="statF" onchange="render()">
+      <option value="">All Statuses</option>
+      <option>Accepted</option><option>Accepted with Issues</option><option>Partially Accepted</option><option>Rejected</option>
+    </select>
+    <button class="btn btn-outline btn-sm" onclick="document.getElementById('srch').value='';document.getElementById('vendF').value='';document.getElementById('statF').value='';render()">✕ Clear</button>
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-header"><h2>GRN Register</h2><span style="font-size:11px;color:var(--ink-soft)" id="tmeta"></span></div>
+    <div class="tbl-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortBy('grnNo')">GRN # ⇅</th>
+            <th onclick="sortBy('poNo')">PO # ⇅</th>
+            <th onclick="sortBy('ticketNo')">Ticket # ⇅</th>
+            <th onclick="sortBy('vendor')">Vendor ⇅</th>
+            <th onclick="sortBy('receivedDate')">Received Date ⇅</th>
+            <th onclick="sortBy('receivedBy')">Received By ⇅</th>
+            <th>Qty Ordered</th>
+            <th>Qty Received</th>
+            <th>Qty Accepted</th>
+            <th>Qty Rejected</th>
+            <th onclick="sortBy('valueReceived')">Value Received ⇅</th>
+            <th>QC Status</th>
+            <th onclick="sortBy('status')">Receipt Status ⇅</th>
+            <th>Debit Note</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="footer-bar">
+      <span id="footerTxt">—</span>
+      <div class="pagination" id="pg"></div>
+    </div>
+  </div>
+</main>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" id="detailModal" onclick="closeIfOuter(event,'detailModal')">
+  <div class="modal">
+    <div class="modal-head">
+      <div><h3 id="dm-title">GRN Detail</h3><div class="modal-sub" id="dm-sub"></div></div>
+      <button class="modal-close" onclick="closeModal('detailModal')">✕</button>
+    </div>
+    <div class="modal-body" id="dm-body"></div>
+  </div>
+</div>
+
+<!-- New GRN Modal -->
+<div class="modal-overlay" id="newGRNModal" onclick="closeIfOuter(event,'newGRNModal')">
+  <div class="modal" style="max-width:860px">
+    <div class="modal-head">
+      <div><h3>Create GRN</h3><div class="modal-sub">Record delivery · Inspect goods · Flag discrepancies</div></div>
+      <button class="modal-close" onclick="closeModal('newGRNModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label>Linked PO #</label>
+          <select id="ng-po">
+            <option>PO-2504-003</option><option>PO-2504-001</option><option>PO-2504-002</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Vendor</label><input id="ng-vendor" placeholder="Auto-fill from PO" value="TechTrack Pvt Ltd"></div>
+        <div class="form-group"><label>Receipt Date</label><input type="date" id="ng-date"></div>
+        <div class="form-group"><label>Received By</label><input id="ng-recv" placeholder="Your name"></div>
+        <div class="form-group"><label>Delivery Location</label>
+          <select id="ng-loc"><option>Decathlon Bhiwandi Warehouse</option><option>Decathlon Thane Store</option><option>Decathlon HQ Mumbai</option></select>
+        </div>
+        <div class="form-group"><label>Transporter / Courier</label><input id="ng-courier" placeholder="Blue Dart, DTDC…"></div>
+        <div class="form-group"><label>Delivery Challan #</label><input id="ng-challan" placeholder="DC-XXXX"></div>
+        <div class="form-group"><label>Vehicle / Docket #</label><input id="ng-vehicle" placeholder="MH-04-XX-0000"></div>
+        <div class="form-group full">
+          <label>Item-wise Receipt & Inspection</label>
+          <table class="recv-table">
+            <thead><tr><th>Description</th><th>Ordered</th><th>Received</th><th>Accepted</th><th>Rejected</th><th>Rejection Reason</th><th>QC</th></tr></thead>
+            <tbody id="recvRows">
+              <tr>
+                <td>Geonaute GPS Running Watch R500</td>
+                <td>20</td>
+                <td><input type="number" value="20"></td>
+                <td><input type="number" value="20"></td>
+                <td><input type="number" value="0"></td>
+                <td><input placeholder="—"></td>
+                <td><select><option>✓ Pass</option><option>⚠ Minor Issue</option><option>✗ Fail</option></select></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="form-group full"><label>QC Checklist</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:4px">
+            ${['Quantity Count','Packaging Intact','Brand Match','Label/Batch #','No Physical Damage','Delivery Challan Matches','Warranty Card Enclosed'].map(c=>`
+            <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-mid);cursor:pointer">
+              <input type="checkbox" checked style="accent-color:var(--blue)">${c}
+            </label>`).join('')}
+          </div>
+        </div>
+        <div class="form-group full"><label>Inspection Remarks</label>
+          <textarea id="ng-remarks" placeholder="Any observations about delivery quality, packaging, or discrepancies…"></textarea>
+        </div>
+        <div class="form-group full" style="display:flex;gap:10px;justify-content:flex-end;padding-top:8px">
+          <button class="btn btn-outline" onclick="closeModal('newGRNModal')">Cancel</button>
+          <button class="btn btn-outline" onclick="alert('Raise Debit Note — connect to debit note workflow')">⚠ Raise Debit Note</button>
+          <button class="btn btn-green" onclick="alert('GRN created! Proceeds to 3-way match.')">✓ Create & Accept GRN</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function fmtINR(n){return n!=null?'₹'+n.toLocaleString('en-IN'):'—'}
+
+const GRNS=[
+  {id:1,grnNo:'GRN-2504-001',poNo:'PO-2504-001',ticketNo:'TKT-2504-001',vendor:'SportGear India Pvt Ltd',cycle:'2025-04',
+   receivedDate:'2025-04-12',receivedBy:'Rahul M.',location:'Decathlon Bhiwandi Warehouse',
+   challanNo:'DC-4001',transporter:'Blue Dart',
+   items:[{desc:'Kipsta Football Size 5',ordered:50,received:50,accepted:50,rejected:0,qc:'Pass',reason:''}],
+   qtyOrdered:50,qtyReceived:50,qtyAccepted:50,qtyRejected:0,
+   valueReceived:42500,status:'Accepted',qcStatus:'Pass',debitNote:'',
+   checks:{qty:true,pkg:true,brand:true,label:true,damage:true,challan:true,warranty:false},
+   remarks:'All 50 footballs received. Packaging intact. Brand verified.'},
+  {id:2,grnNo:'GRN-2504-002',poNo:'PO-2504-002',ticketNo:'TKT-2504-002',vendor:'FitEquip Solutions',cycle:'2025-04',
+   receivedDate:'2025-04-15',receivedBy:'Priya S.',location:'Decathlon Bhiwandi Warehouse',
+   challanNo:'DC-4002',transporter:'DTDC',
+   items:[{desc:'Domyos Adjustable Dumbbell 5-25kg',ordered:10,received:10,accepted:9,rejected:1,qc:'Minor Issue',reason:'1 set packaging damaged, product intact, accepted'}],
+   qtyOrdered:10,qtyReceived:10,qtyAccepted:9,qtyRejected:1,
+   valueReceived:64800,status:'Accepted with Issues',qcStatus:'Minor Issue',debitNote:'DN-2504-001',
+   checks:{qty:true,pkg:false,brand:true,label:true,damage:false,challan:true,warranty:true},
+   remarks:'1 dumbbell set had broken packaging. Product usable. Debit note raised for packaging damage.'},
+  {id:3,grnNo:'GRN-2504-004',poNo:'PO-2504-004',ticketNo:'TKT-2504-004',vendor:'SportGear India Pvt Ltd',cycle:'2025-04',
+   receivedDate:'2025-04-10',receivedBy:'Rahul M.',location:'Decathlon Thane Store',
+   challanNo:'DC-4004',transporter:'Delhivery',
+   items:[{desc:'Kipsta Shin Guards Adult Assorted',ordered:100,received:100,accepted:100,rejected:0,qc:'Pass',reason:''}],
+   qtyOrdered:100,qtyReceived:100,qtyAccepted:100,qtyRejected:0,
+   valueReceived:28000,status:'Accepted',qcStatus:'Pass',debitNote:'',
+   checks:{qty:true,pkg:true,brand:true,label:true,damage:true,challan:true,warranty:false},
+   remarks:'All sizes verified. Assortment matches PO.'},
+  {id:4,grnNo:'GRN-2504-005',poNo:'PO-2504-005',ticketNo:'TKT-2504-005',vendor:'AquaMaxx Sports',cycle:'2025-04',
+   receivedDate:'2025-04-14',receivedBy:'Priya S.',location:'Decathlon Navi Mumbai',
+   challanNo:'DC-4005',transporter:'Blue Dart',
+   items:[{desc:'Nabaiji Swim Goggles UV Pack/12',ordered:60,received:58,accepted:58,rejected:2,qc:'Minor Issue',reason:'2 packs missing from box'}],
+   qtyOrdered:60,qtyReceived:58,qtyAccepted:58,qtyRejected:2,
+   valueReceived:22620,status:'Accepted with Issues',qcStatus:'Minor Issue',debitNote:'DN-2504-002',
+   checks:{qty:false,pkg:true,brand:true,label:true,damage:true,challan:true,warranty:false},
+   remarks:'2 packs short. Vendor to send balance or raise CN.'},
+  {id:5,grnNo:'GRN-2503-001',poNo:'PO-2503-001',ticketNo:'TKT-2503-001',vendor:'FitEquip Solutions',cycle:'2025-03',
+   receivedDate:'2025-03-12',receivedBy:'Rahul M.',location:'Decathlon Bhiwandi Warehouse',
+   challanNo:'DC-3001',transporter:'Ekart',
+   items:[{desc:'Corength Resistance Bands Set 5 Levels',ordered:80,received:80,accepted:80,rejected:0,qc:'Pass',reason:''}],
+   qtyOrdered:80,qtyReceived:80,qtyAccepted:80,qtyRejected:0,
+   valueReceived:25600,status:'Accepted',qcStatus:'Pass',debitNote:'',
+   checks:{qty:true,pkg:true,brand:true,label:true,damage:true,challan:true,warranty:false},
+   remarks:''},
+  {id:6,grnNo:'GRN-2503-002',poNo:'PO-2503-002',ticketNo:'TKT-2503-002',vendor:'TechTrack Pvt Ltd',cycle:'2025-03',
+   receivedDate:'2025-03-18',receivedBy:'Mohi K.',location:'Decathlon HQ Mumbai',
+   challanNo:'DC-3002',transporter:'Blue Dart',
+   items:[{desc:'Decathlon Bluetooth Smart Scale Model 900',ordered:15,received:15,accepted:15,rejected:0,qc:'Pass',reason:''}],
+   qtyOrdered:15,qtyReceived:15,qtyAccepted:15,qtyRejected:0,
+   valueReceived:42000,status:'Accepted',qcStatus:'Pass',debitNote:'',
+   checks:{qty:true,pkg:true,brand:true,label:true,damage:true,challan:true,warranty:true},
+   remarks:'All units tested. Warranty cards enclosed.'}
+];
+
+let filtered=[...GRNS],sortKey='receivedDate',sortDir=-1,page=1;const PZ=7;
+
+function updateKPIs(){
+  document.getElementById('kTotal').textContent=GRNS.length;
+  document.getElementById('kAccepted').textContent=GRNS.filter(g=>g.status.startsWith('Accepted')).length;
+  document.getElementById('kIssues').textContent=GRNS.filter(g=>g.status.includes('Issues')||g.status==='Rejected').length;
+  document.getElementById('kPartial').textContent=GRNS.filter(g=>g.qtyReceived<g.qtyOrdered).length;
+  document.getElementById('kDebit').textContent=GRNS.filter(g=>g.debitNote).length;
+  document.getElementById('kValue').textContent='₹'+GRNS.reduce((s,g)=>s+g.valueReceived,0).toLocaleString('en-IN');
+  // QC bars
+  const n=GRNS.length;
+  const qtyPct=Math.round(GRNS.filter(g=>g.checks.qty).length/n*100);
+  const qualPct=Math.round(GRNS.filter(g=>g.checks.damage&&g.checks.pkg).length/n*100);
+  const specPct=Math.round(GRNS.filter(g=>g.checks.brand).length/n*100);
+  const timePct=83;
+  const docPct=Math.round(GRNS.filter(g=>g.checks.challan).length/n*100);
+  [['qcQty',qtyPct],['qcQual',qualPct],['qcSpec',specPct],['qcTime',timePct],['qcDoc',docPct]].forEach(([id,pct])=>{
+    document.getElementById(id).style.width=pct+'%';
+    document.getElementById(id+'Val').textContent=pct+'%';
+  });
+}
+
+function render(){
+  const srch=document.getElementById('srch').value.toLowerCase();
+  const vend=document.getElementById('vendF').value;
+  const stat=document.getElementById('statF').value;
+  filtered=GRNS.filter(g=>{
+    if(vend&&g.vendor!==vend)return false;
+    if(stat&&g.status!==stat)return false;
+    if(srch){const h=[g.grnNo,g.poNo,g.ticketNo,g.vendor,g.status].join(' ').toLowerCase();if(!h.includes(srch))return false;}
+    return true;
+  });
+  filtered.sort((a,b)=>{let va=a[sortKey]??'',vb=b[sortKey]??'';return typeof va==='number'?(va-vb)*sortDir:String(va).localeCompare(String(vb))*sortDir;});
+  page=1;renderTable();
+}
+function sortBy(k){if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=1;}render();}
+
+const stMap={'Accepted':'badge-green','Accepted with Issues':'badge-orange','Partially Accepted':'badge-yellow','Rejected':'badge-red'};
+const qcMap={'Pass':'badge-green','Minor Issue':'badge-orange','Fail':'badge-red'};
+
+function renderTable(){
+  const start=(page-1)*PZ,paged=filtered.slice(start,start+PZ);
+  document.getElementById('tbody').innerHTML=paged.map(g=>{
+    const hasIssue=g.status.includes('Issues')||g.status==='Rejected';
+    const qtyClass=g.qtyAccepted===g.qtyOrdered?'qty-full':g.qtyAccepted<g.qtyOrdered?'qty-partial':'qty-full';
+    return`<tr class="${hasIssue?'row-issue':''}" onclick="openDetail(${g.id})">
+      <td style="font-family:'DM Mono',monospace;font-weight:500">${g.grnNo}</td>
+      <td style="font-family:'DM Mono',monospace">${g.poNo}</td>
+      <td style="font-family:'DM Mono',monospace">${g.ticketNo}</td>
+      <td>${g.vendor}</td>
+      <td>${g.receivedDate}</td>
+      <td>${g.receivedBy}</td>
+      <td>${g.qtyOrdered}</td>
+      <td><div class="qty-cell"><span class="qty-ord">${g.qtyReceived}</span>${g.qtyReceived<g.qtyOrdered?`<span class="qty-recv qty-short">Short by ${g.qtyOrdered-g.qtyReceived}</span>`:''}</div></td>
+      <td><span class="${qtyClass}">${g.qtyAccepted}</span></td>
+      <td><span class="${g.qtyRejected>0?'qty-short':'qty-full'}">${g.qtyRejected}</span></td>
+      <td class="amount">${fmtINR(g.valueReceived)}</td>
+      <td><span class="badge ${qcMap[g.qcStatus]||'badge-gray'}">${g.qcStatus}</span></td>
+      <td><span class="badge ${stMap[g.status]||'badge-gray'}">${g.status}</span></td>
+      <td>${g.debitNote?`<span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--orange)">${g.debitNote}</span>`:'—'}</td>
+      <td onclick="event.stopPropagation()">
+        <button class="act-btn" onclick="openDetail(${g.id})">View</button>
+        <button class="act-btn" onclick="alert('PDF GRN export')">PDF</button>
+      </td>
+    </tr>`;
+  }).join('');
+  document.getElementById('tmeta').textContent=`${filtered.length} GRNs`;
+  document.getElementById('footerTxt').textContent=`Showing ${start+1}–${Math.min(start+PZ,filtered.length)} of ${filtered.length}`;
+  document.getElementById('pg').innerHTML=Array.from({length:Math.ceil(filtered.length/PZ)},(_,i)=>
+    `<button class="pg-btn${i+1===page?' active':''}" onclick="page=${i+1};renderTable()">${i+1}</button>`).join('');
+}
+
+function openDetail(id){
+  const g=GRNS.find(x=>x.id===id);
+  document.getElementById('dm-title').textContent=g.grnNo;
+  document.getElementById('dm-sub').textContent=`${g.vendor} · ${g.poNo} · ${g.receivedDate}`;
+  const checks=[
+    ['Quantity Count',g.checks.qty],['Packaging Intact',g.checks.pkg],['Brand Match',g.checks.brand],
+    ['Label/Batch #',g.checks.label],['No Physical Damage',g.checks.damage],
+    ['Delivery Challan OK',g.checks.challan],['Warranty Card',g.checks.warranty]
+  ];
+  document.getElementById('dm-body').innerHTML=`
+    <div class="grn-doc">
+      <div class="grn-head">
+        <div><div class="grn-brand">GOODS RECEIPT NOTE</div><div style="font-size:11px;opacity:0.85;margin-top:4px">DECATHLON SPORTS INDIA PVT LTD</div></div>
+        <div class="grn-meta"><div>GRN #: <strong>${g.grnNo}</strong></div><div>PO #: ${g.poNo}</div><div>Date: ${g.receivedDate}</div><div>Status: ${g.status}</div></div>
+      </div>
+      <div class="grn-body">
+        <div class="grn-info">
+          <div class="grn-info-item"><label>Vendor</label><div class="val">${g.vendor}</div></div>
+          <div class="grn-info-item"><label>Received By</label><div class="val">${g.receivedBy}</div></div>
+          <div class="grn-info-item"><label>Location</label><div class="val">${g.location}</div></div>
+          <div class="grn-info-item"><label>Delivery Challan #</label><div class="val">${g.challanNo}</div></div>
+          <div class="grn-info-item"><label>Transporter</label><div class="val">${g.transporter}</div></div>
+          <div class="grn-info-item"><label>Debit Note</label><div class="val" style="color:${g.debitNote?'var(--orange)':'var(--ink-soft)'}">${g.debitNote||'None'}</div></div>
+        </div>
+        <table class="grn-table">
+          <thead><tr><th>Description</th><th>Ordered</th><th>Received</th><th>Accepted</th><th>Rejected</th><th>Rejection Reason</th><th>QC</th></tr></thead>
+          <tbody>
+            ${g.items.map(it=>`<tr>
+              <td>${it.desc}</td>
+              <td>${it.ordered}</td>
+              <td class="${it.received<it.ordered?'warn':'ok'}">${it.received}</td>
+              <td class="ok">${it.accepted}</td>
+              <td class="${it.rejected>0?'fail':'ok'}">${it.rejected}</td>
+              <td style="font-size:11px">${it.reason||'—'}</td>
+              <td><span class="badge ${it.qc==='Pass'?'badge-green':it.qc==='Minor Issue'?'badge-orange':'badge-red'}">${it.qc}</span></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+        <div style="display:flex;justify-content:flex-end;gap:24px;margin-bottom:14px;font-size:12px">
+          <span>Total Ordered: <strong>${g.qtyOrdered}</strong></span>
+          <span>Total Received: <strong>${g.qtyReceived}</strong></span>
+          <span>Accepted: <strong style="color:var(--green)">${g.qtyAccepted}</strong></span>
+          <span>Rejected: <strong style="color:${g.qtyRejected>0?'var(--red)':'var(--ink-soft)'}">${g.qtyRejected}</strong></span>
+          <span>Value Received: <strong>${fmtINR(g.valueReceived)}</strong></span>
+        </div>
+        <div class="qc-section">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:12px;color:var(--ink)">QC Checklist</div>
+          <div class="qc-checks">
+            ${checks.map(([lbl,ok])=>`<div class="qc-check ${ok===null?'na':ok?'pass':'fail'}"><div class="qc-check-label">${lbl}</div><div class="qc-check-val">${ok===null?'N/A':ok?'✓ Pass':'✗ Fail'}</div></div>`).join('')}
+          </div>
+        </div>
+        ${g.remarks?`<div style="margin-top:14px;padding:12px 14px;background:var(--surface);border-radius:8px;font-size:11px;color:var(--ink-mid)"><strong>Remarks:</strong> ${g.remarks}</div>`:''}
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+      <a href="invoice.html" class="btn btn-primary" style="text-decoration:none">→ Match Invoice</a>
+      ${g.debitNote?`<button class="btn btn-outline" onclick="alert('Debit Note ${g.debitNote} details')">📄 View Debit Note</button>`:'<button class="btn btn-outline" onclick="alert(\'Raise debit note workflow\')">⚠ Raise Debit Note</button>'}
+      <button class="btn btn-outline" onclick="alert('PDF GRN')">⬇ Download GRN</button>
+    </div>`;
+  document.getElementById('detailModal').classList.add('open');
+}
+
+function openNewGRN(){document.getElementById('newGRNModal').classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function closeIfOuter(e,id){if(e.target===document.getElementById(id))closeModal(id);}
+function exportCSV(){
+  const h=['GRN#','PO#','Ticket#','Vendor','ReceivedDate','ReceivedBy','QtyOrdered','QtyReceived','QtyAccepted','QtyRejected','ValueReceived','QCStatus','Status','DebitNote'];
+  const rows=GRNS.map(g=>[g.grnNo,g.poNo,g.ticketNo,`"${g.vendor}"`,g.receivedDate,g.receivedBy,g.qtyOrdered,g.qtyReceived,g.qtyAccepted,g.qtyRejected,g.valueReceived,g.qcStatus,g.status,g.debitNote||''].join(','));
+  const a=document.createElement('a');a.href='data:text/csv,'+encodeURIComponent([h.join(','),...rows].join('\n'));a.download='grn.csv';a.click();
+}
+
+updateKPIs();render();
+</script>
+</body>
+</html>
